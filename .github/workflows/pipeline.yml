@@ -85,4 +85,4 @@ jobs:
             docker pull hamidbae/capstone14-be-alterra:latest
             docker pull hamidbae/capstone14-be-alterra-coverage:latest
             docker run -d --rm --name capstone14-be-coverage -p 8000:80 hamidbae/capstone14-be-alterra-coverage:latest
-            docker run -d --rm --name capstone14-be -p 80:8080 --env ${{ secrets.JWT_SECRET }} --env ${{ secrets.JWT_EXPIRATION }} --env-file=.dev.env --network alterra-capstone14-network hamidbae/capstone14-be-alterra:latest
+            docker run -d --rm --name capstone14-be -p 80:8080 --env ${{ secrets.JWT_SECRET }} --env ${{ secrets.JWT_EXPIRATION }} --env-file=.dev.env --network c14-network hamidbae/capstone14-be-alterra:latest
