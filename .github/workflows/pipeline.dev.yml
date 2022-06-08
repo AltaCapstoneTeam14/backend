@@ -3,7 +3,7 @@ name: Capstone Project Alterra Academy
 on:
   push:
     branches:
-      - master
+      - development
 
 jobs:
   run_test:
@@ -19,6 +19,18 @@ jobs:
           distribution: 'adopt'
       - name: Maven Verify
         run: mvn clean verify
+      - name: Login to docker hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build docker image
+        uses: docker/build-push-action@v2
+        with:
+          file: unit-test.dockerfile
+          context: .
+          push: true
+          tags: hamidbae/capstone14-be-alterra-coverage:latest
   build:
     name: Build
     runs-on: ubuntu-18.04
@@ -43,7 +55,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: hamidbae/capstone14-be-alterra:latest
+          tags: hamidbae/capstone14-be-dev-alterra:latest
   deployment:
     name: Deploy
     runs-on: ubuntu-18.04
@@ -58,7 +70,7 @@ jobs:
           port: 22
           username: ${{ secrets.EC2_SSH_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          source: .prod.env
+          source: .dev.env
           target: /home/${{ secrets.EC2_SSH_USERNAME }}
       - name: Deploy using ssh
         uses: appleboy/ssh-action@master
@@ -68,7 +80,9 @@ jobs:
           username: ${{ secrets.EC2_SSH_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            docker stop capstone14-be
-            docker rmi hamidbae/capstone14-be-alterra:latest
-            docker pull hamidbae/capstone14-be-alterra:latest
-            docker run -d --rm --name capstone14-be -p 80:8080 --env ${{ secrets.JWT_SECRET }} --env ${{ secrets.JWT_EXPIRATION }} --env-file=.prod.env --network c14-network hamidbae/capstone14-be-alterra:latest
+            docker stop capstone14-be-dev capstone14-be-coverage
+            docker rmi hamidbae/capstone14-be-dev-alterra:latest hamidbae/capstone14-be-alterra-coverage:latest
+            docker pull hamidbae/capstone14-be-dev-alterra:latest
+            docker pull hamidbae/capstone14-be-alterra-coverage:latest
+            docker run -d --rm --name capstone14-be-coverage -p 8000:80 hamidbae/capstone14-be-alterra-coverage:latest
+            docker run -d --rm --name capstone14-be-dev -p 8081:8080 --env ${{ secrets.JWT_SECRET }} --env ${{ secrets.JWT_EXPIRATION }} --env-file=.dev.env --network c14-network-dev hamidbae/capstone14-be-dev-alterra:latest
