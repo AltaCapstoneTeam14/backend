@@ -6,6 +6,7 @@ import com.alterra.capstone14.domain.dao.Role;
 import com.alterra.capstone14.domain.dao.User;
 import com.alterra.capstone14.domain.dto.LoginDto;
 import com.alterra.capstone14.domain.dto.UserDto;
+import com.alterra.capstone14.domain.dto.UserNoPwdDto;
 import com.alterra.capstone14.repository.RoleRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.util.Response;
@@ -50,6 +51,7 @@ public class AuthService {
                 .name(userDto.getName())
                 .email(userDto.getEmail())
                 .password(encoder.encode(userDto.getPassword()))
+                .phone(userDto.getPhone())
                 .build();
 
         Set<String> strRoles = userDto.getRoles();
@@ -65,10 +67,11 @@ public class AuthService {
         user.setRoles(roles);
         userRepository.save(user);
 
-        UserDto userNoPasswordDto = UserDto.builder()
+        UserNoPwdDto userNoPasswordDto = UserNoPwdDto.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
+                .phone(user.getPhone())
                 .createdAt(user.getCreatedAt())
                 .build();
 
