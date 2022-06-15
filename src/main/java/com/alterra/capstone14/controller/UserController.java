@@ -17,6 +17,12 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @GetMapping("")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<Object> getProfile() {
+        return userService.getProfile();
+    }
+
     @PutMapping("")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<Object> updateUserData(@Valid @RequestBody UserNoPwdDto userDto) {
