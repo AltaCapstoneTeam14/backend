@@ -33,6 +33,23 @@ public class UserService {
     @Autowired
     PasswordEncoder encoder;
 
+    public ResponseEntity<Object> getProfile() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        Optional<User> user = userRepository.findByEmail(email);
+
+        UserDto userDto = UserDto.builder()
+                .id(user.get().getId())
+                .name(user.get().getName())
+                .email(user.get().getEmail())
+                .phone(user.get().getPhone())
+                .createdAt(user.get().getCreatedAt())
+                .updatedAt(user.get().getUpdatedAt())
+                .build();
+
+        return Response.build(Response.get("user profile"), userDto, null, HttpStatus.OK);
+    }
+
     public ResponseEntity<Object> updateUserData(UserNoPwdDto userDto) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
