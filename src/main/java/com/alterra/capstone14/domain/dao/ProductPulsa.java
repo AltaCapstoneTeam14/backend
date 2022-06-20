@@ -1,6 +1,5 @@
 package com.alterra.capstone14.domain.dao;
 
-
 import javax.persistence.*;
 import lombok.*;
 
@@ -10,6 +9,7 @@ import lombok.*;
 @Entity
 public class ProductPulsa {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "pulsa_id")
