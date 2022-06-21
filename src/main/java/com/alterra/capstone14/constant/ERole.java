@@ -1,4 +1,4 @@
-package com.alterra.capstone14.domain.dao;
+package com.alterra.capstone14.constant;
 
 public enum ERole {
     USER,

@@ -68,6 +68,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v1/users/**").permitAll()
                 .antMatchers( "/v1/admin/**").permitAll()
                 .antMatchers( "/v1/super-admin/**").permitAll()
+                .antMatchers( "/v1/topup-amount/**").permitAll()
+                .antMatchers( "/v1/topup/**").permitAll()
+                .antMatchers( "/v1/notification/**").permitAll()
                 .anyRequest().authenticated();
 
         http.headers().frameOptions().disable();
