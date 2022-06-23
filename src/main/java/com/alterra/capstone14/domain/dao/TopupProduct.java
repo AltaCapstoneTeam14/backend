@@ -1,23 +1,26 @@
 package com.alterra.capstone14.domain.dao;
 
-import com.alterra.capstone14.constant.ERole;
 import lombok.*;
 
 import javax.persistence.*;
 
 @Getter
 @Setter
-@Entity
 @Builder
-@Table(name = "roles")
+@Table(name = "products_topup")
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Role {
+public class TopupProduct {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "name")
-    private ERole name;
+    @Column(name = "amount", nullable = false)
+    private Long amount;
+
+    @Column(name = "gross_amount", nullable = false)
+    private Long grossAmount;
+
 }

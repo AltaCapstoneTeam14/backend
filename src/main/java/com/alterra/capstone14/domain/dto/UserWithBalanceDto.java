@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
@@ -14,10 +11,6 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDto extends UserNoPwdDto {
-
-    @NotBlank(message = "Password is required!")
-    @Size(min = 8, message = "The length of password must be at least 8 characters.")
-    private String password;
-
+public class UserWithBalanceDto extends UserDto{
+    private BalanceDto balance;
 }
