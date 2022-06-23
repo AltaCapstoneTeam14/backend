@@ -63,10 +63,10 @@ public class TransactionDetailService {
     @Value("${midtrans.baseurl}")
     private String midtransBaseUrl;
 
-    @Value("${midtrans.authHeader}")
+    @Value("${midtrans.auth.header}")
     private String midtransAuthHeader;
 
-    @Value("${midtrans.serverKey}")
+    @Value("${midtrans.server.key}")
     private String midtransServerKey;
 
     @Value(("${orderid.prefix}"))
