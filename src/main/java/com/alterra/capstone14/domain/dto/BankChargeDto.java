@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class BankChargeDto {
     @JsonProperty("order_id")
-    private Long orderId;
+    private String orderId;
 
     private String bank;
 

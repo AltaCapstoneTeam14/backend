@@ -1,5 +1,6 @@
 package com.alterra.capstone14.domain.dao;
 
+import com.alterra.capstone14.constant.EProductType;
 import com.alterra.capstone14.domain.common.BaseCreatedAt;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -16,8 +17,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "topup_details")
-public class TopupDetail extends BaseCreatedAt {
+@Table(name = "transaction_details")
+public class TransactionDetail extends BaseCreatedAt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,22 +29,31 @@ public class TopupDetail extends BaseCreatedAt {
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     private User user;
 
-    @Column(name = "amount", nullable = false)
-    private Integer amount;
+    @Column(name = "order_id")
+    private String orderId;
+
+    @Column(name = "product_type", nullable = false)
+//    @Enumerated(EnumType.STRING)
+    private String productType;
+
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
     @Column(name = "gross_amount", nullable = false)
-    private Integer grossAmount;
+    private Long grossAmount;
 
     @Column(name = "payment_type", nullable = false)
+    //    @Enumerated(EnumType.STRING)
     private String paymentType;
 
-    @Column(name = "transfer_method", nullable = true)
+    @Column(name = "transfer_method", nullable = false)
+    //    @Enumerated(EnumType.STRING)
     private String transferMethod;
 
-    @Column(name = "status", nullable = true)
+    @Column(name = "status", nullable = false)
     private String status;
     
     @Lob
-    @Column(name = "additional_data")
-    private String additionalData;
+    @Column(name = "json_notification")
+    private String jsonNotification;
 }

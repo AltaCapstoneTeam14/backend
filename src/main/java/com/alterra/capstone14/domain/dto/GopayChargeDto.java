@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class GopayChargeDto {
     @JsonProperty("order_id")
-    private Long orderId;
+    private String orderId;
 
     private String status;
 

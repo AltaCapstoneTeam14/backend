@@ -19,4 +19,12 @@ public class GopayBody extends TransactionDetailBody {
                         "\"transaction_details\":%s" +
                 "}", paymentType, super.transactionDetailString());
     }
+
+//    public String toStringDev() {
+//        return String.format(
+//                "{" +
+//                        "\"payment_type\":\"%s\"," +
+//                        "\"transaction_details\":%s" +
+//                        "}", paymentType, super.transactionDetailStringDev());
+//    }
 }

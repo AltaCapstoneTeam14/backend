@@ -7,17 +7,20 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Builder
-@Table(name = "topup_amount_list")
+@Table(name = "products_topup")
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class TopupAmount {
+public class TopupProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "amount", nullable = false)
-    private Integer amount;
+    private Long amount;
+
+    @Column(name = "gross_amount", nullable = false)
+    private Long grossAmount;
 
 }

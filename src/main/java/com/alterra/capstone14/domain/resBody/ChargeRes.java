@@ -13,10 +13,13 @@ import lombok.experimental.SuperBuilder;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChargeRes {
     @JsonProperty("order_id")
-    private Long orderId;
+    private String orderId;
 
     @JsonProperty("status_code")
     private String statusCode;
+
+    @JsonProperty("transaction_status")
+    private String transactionStatus;
 
     @JsonProperty("fraud_status")
     private String fraudStatus;

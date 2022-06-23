@@ -48,7 +48,7 @@ public class User extends BaseIsDeleted {
 
     @JsonIgnore
     @OneToMany(mappedBy = "user")
-    private List<TopupDetail> topupDetails;
+    private List<TransactionDetail> topupDetails;
 
     @OneToOne(mappedBy = "user")
     private Balance balance;

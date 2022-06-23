@@ -22,4 +22,15 @@ public class BankTransferBody extends GopayBody {
                         "}" +
                 "}", super.getPaymentType(), super.transactionDetailString(), bank);
     }
+
+//    public String toStringDev() {
+//        return String.format(
+//                "{" +
+//                        "\"payment_type\":\"%s\"," +
+//                        "\"transaction_details\":%s," +
+//                        "\"bank_transfer\":{" +
+//                            "\"bank\":\"%s\"" +
+//                        "}" +
+//                "}", super.getPaymentType(), super.transactionDetailStringDev(), bank);
+//    }
 }
