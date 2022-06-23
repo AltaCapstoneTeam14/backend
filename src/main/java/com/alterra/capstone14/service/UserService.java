@@ -35,6 +35,11 @@ public class UserService {
         Optional<User> user = userRepository.findByEmail(email);
 
         Optional<Balance> balance = balanceRepository.findByUserId(user.get().getId());
+        if(balance.isEmpty()){
+            Balance newBalance = Balance.builder().user(user.get()).amount(0L).build();
+            balanceRepository.save(newBalance);
+            balance = Optional.of(newBalance);
+        }
 
         UserWithBalanceDto userDto = UserWithBalanceDto.builder()
                 .id(user.get().getId())

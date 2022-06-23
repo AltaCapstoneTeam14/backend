@@ -2,11 +2,13 @@ package com.alterra.capstone14.service;
 
 import com.alterra.capstone14.config.security.JwtUtils;
 import com.alterra.capstone14.constant.ERole;
+import com.alterra.capstone14.domain.dao.Balance;
 import com.alterra.capstone14.domain.dao.Role;
 import com.alterra.capstone14.domain.dao.User;
 import com.alterra.capstone14.domain.dto.LoginDto;
 import com.alterra.capstone14.domain.dto.UserDto;
 import com.alterra.capstone14.domain.dto.UserNoPwdDto;
+import com.alterra.capstone14.repository.BalanceRepository;
 import com.alterra.capstone14.repository.RoleRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.util.Response;
@@ -31,6 +33,9 @@ public class AuthService {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    BalanceRepository balanceRepository;
 
     @Autowired
     PasswordEncoder encoder;
@@ -65,6 +70,9 @@ public class AuthService {
 
         user.setRoles(roles);
         userRepository.save(user);
+
+        Balance balance = Balance.builder().user(user).amount(0L).build();
+        balanceRepository.save(balance);
 
         UserNoPwdDto userNoPasswordDto = UserNoPwdDto.builder()
                 .id(user.getId())
