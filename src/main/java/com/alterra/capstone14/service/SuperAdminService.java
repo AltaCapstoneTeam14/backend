@@ -6,6 +6,7 @@ import com.alterra.capstone14.domain.dao.Role;
 import com.alterra.capstone14.domain.dao.User;
 import com.alterra.capstone14.domain.dto.EmailDto;
 import com.alterra.capstone14.domain.dto.UserDto;
+import com.alterra.capstone14.domain.dto.UserNoPwdDto;
 import com.alterra.capstone14.repository.RoleRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.util.Response;
@@ -30,15 +31,6 @@ public class SuperAdminService {
     @Autowired
     RoleRepository roleRepository;
 
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    JwtUtils jwtUtils;
-
-    @Autowired
-    AuthenticationManager authenticationManager;
-
     public ResponseEntity<Object> addAdminRole(EmailDto emailDto) {
         Optional<User> user = userRepository.findByEmail(emailDto.getEmail());
         if(user.isEmpty()){
@@ -57,13 +49,14 @@ public class SuperAdminService {
         user.get().setRoles(roles);
         userRepository.save(user.get());
 
-        UserDto userDto1 = UserDto.builder()
+        UserNoPwdDto userNoPwDto = UserNoPwdDto.builder()
                 .id(user.get().getId())
                 .name(user.get().getName())
                 .email(user.get().getEmail())
+                .phone(user.get().getPhone())
                 .createdAt(user.get().getCreatedAt())
                 .build();
 
-        return Response.build(Response.update("user"), userDto1, null, HttpStatus.CREATED);
+        return Response.build(Response.update("user"), userNoPwDto, null, HttpStatus.CREATED);
     }
 }

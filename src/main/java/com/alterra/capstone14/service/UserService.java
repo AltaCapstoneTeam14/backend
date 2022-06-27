@@ -65,7 +65,7 @@ public class UserService {
         user.get().setName(userDto.getName());
         user.get().setPhone(userDto.getPhone());
 
-        log.info("email {} = {}", user.get().getEmail(), userDto.getEmail());
+//        log.info("email {} = {}", user.get().getEmail(), userDto.getEmail());
         if(!user.get().getEmail().equals(userDto.getEmail())){
             if (Boolean.TRUE.equals(userRepository.existsByEmail(userDto.getEmail()))) {
                 return Response.build(Response.exist("user", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
@@ -74,7 +74,7 @@ public class UserService {
         }
         userRepository.save(user.get());
 
-        UserDto userDto1 = UserDto.builder()
+        UserNoPwdDto userNoPwdDto = UserNoPwdDto.builder()
                 .id(user.get().getId())
                 .name(user.get().getName())
                 .email(user.get().getEmail())
@@ -82,7 +82,7 @@ public class UserService {
                 .createdAt(user.get().getCreatedAt())
                 .build();
 
-        return Response.build(Response.update("user"), userDto1, null, HttpStatus.CREATED);
+        return Response.build(Response.update("user"), userNoPwdDto, null, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> updateUserPassword(PasswordDto passwordDto) {
@@ -93,7 +93,7 @@ public class UserService {
         user.get().setPassword(encoder.encode(passwordDto.getPassword()));
         userRepository.save(user.get());
 
-        UserDto userDto1 = UserDto.builder()
+        UserNoPwdDto userNoPwdDto = UserNoPwdDto.builder()
                 .id(user.get().getId())
                 .name(user.get().getName())
                 .email(user.get().getEmail())
@@ -101,7 +101,7 @@ public class UserService {
                 .createdAt(user.get().getCreatedAt())
                 .build();
 
-        return Response.build(Response.update("password"), userDto1, null, HttpStatus.CREATED);
+        return Response.build(Response.update("password"), userNoPwdDto, null, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> deleteUser() {

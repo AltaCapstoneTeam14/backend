@@ -4,8 +4,10 @@ import com.alterra.capstone14.config.security.JwtUtils;
 import com.alterra.capstone14.constant.ERole;
 import com.alterra.capstone14.domain.dao.Balance;
 import com.alterra.capstone14.domain.dao.Role;
+import com.alterra.capstone14.domain.dao.TopupProduct;
 import com.alterra.capstone14.domain.dao.User;
 import com.alterra.capstone14.domain.dto.LoginDto;
+import com.alterra.capstone14.domain.dto.TokenDto;
 import com.alterra.capstone14.domain.dto.UserDto;
 import com.alterra.capstone14.domain.dto.UserNoPwdDto;
 import com.alterra.capstone14.repository.BalanceRepository;
@@ -13,6 +15,7 @@ import com.alterra.capstone14.repository.RoleRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.util.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,19 +49,17 @@ public class AuthService {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     public ResponseEntity<Object> registerUser(UserDto userDto) {
         if (Boolean.TRUE.equals(userRepository.existsByEmail(userDto.getEmail()))) {
             return Response.build(Response.exist("user", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
         }
 
-        User user = User.builder()
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .password(encoder.encode(userDto.getPassword()))
-                .phone(userDto.getPhone())
-                .build();
+        User user = modelMapper.map(userDto, User.class);
+        user.setPassword(encoder.encode(userDto.getPassword()));
 
-        Set<String> strRoles = userDto.getRoles();
         Set<Role> roles = new HashSet<>();
 
         Optional<Role> userRole = roleRepository.findByName(ERole.USER);
@@ -82,7 +83,7 @@ public class AuthService {
                 .createdAt(user.getCreatedAt())
                 .build();
 
-        return Response.build(Response.add("User"), userNoPasswordDto, null, HttpStatus.CREATED);
+        return Response.build("Register success", userNoPasswordDto, null, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> loginUser(LoginDto loginDto) {
@@ -103,8 +104,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtUtils.generateJwtToken(authentication);
-        Map<String, String> token = new HashMap<>();
-        token.put("token", jwt);
+        TokenDto token = TokenDto.builder().token(jwt).build();
 
         return Response.build("Login success", token, null, HttpStatus.OK);
     }
@@ -137,8 +137,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtUtils.generateJwtToken(authentication);
-        Map<String, String> token = new HashMap<>();
-        token.put("token", jwt);
+        TokenDto token = TokenDto.builder().token(jwt).build();
 
         return Response.build("Login success", token, null, HttpStatus.OK);
     }
@@ -172,8 +171,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtUtils.generateJwtToken(authentication);
-        Map<String, String> token = new HashMap<>();
-        token.put("token", jwt);
+        TokenDto token = TokenDto.builder().token(jwt).build();
 
         return Response.build("Login success", token, null, HttpStatus.OK);
     }
