@@ -219,9 +219,13 @@ public class TransactionDetailService {
             Response.build(Response.notFound("product pulsa"), null, null, HttpStatus.BAD_REQUEST);
         }
 
-        log.info("user balance {}", user.get().getBalance().getAmount());
-        log.info("gross amount {}", pulsaProduct.get().getGrossAmount());
-        log.info("compaere {}",user.get().getBalance().getAmount().compareTo(pulsaProduct.get().getGrossAmount()) );
+        if(pulsaProduct.isPresent() && pulsaProduct.get().getStock().compareTo(0L) <= 0){
+            Response.build("Product is empty", null, null, HttpStatus.BAD_REQUEST);
+        }
+
+//        log.info("user balance {}", user.get().getBalance().getAmount());
+//        log.info("gross amount {}", pulsaProduct.get().getGrossAmount());
+//        log.info("compaere {}",user.get().getBalance().getAmount().compareTo(pulsaProduct.get().getGrossAmount()) );
         if(user.get().getBalance().getAmount().compareTo(pulsaProduct.get().getGrossAmount()) < 0 ){
             return Response.build("user balance not enough", null, null, HttpStatus.BAD_REQUEST);
         }
