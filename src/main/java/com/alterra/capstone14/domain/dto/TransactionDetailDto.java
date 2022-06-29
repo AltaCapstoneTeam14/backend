@@ -1,6 +1,7 @@
 package com.alterra.capstone14.domain.dto;
 
 import com.alterra.capstone14.domain.common.BaseCreatedAt;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionDetailDto extends BaseCreatedAt {
     private Long id;
 
@@ -23,11 +25,11 @@ public class TransactionDetailDto extends BaseCreatedAt {
 
     private UserDto user;
 
-    @NotBlank(message = "product_type amount is required!")
+//    @NotBlank(message = "product_type is required!")
     @JsonProperty("product_type")
     private String productType;
 
-    @NotNull(message = "gross_amount is required")
+    @NotNull(message = "product_id is required")
     @JsonProperty("product_id")
     private Long productId;
 

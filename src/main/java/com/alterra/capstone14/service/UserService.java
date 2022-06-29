@@ -63,7 +63,13 @@ public class UserService {
         Optional<User> user = userRepository.findByEmail(email);
 
         user.get().setName(userDto.getName());
-        user.get().setPhone(userDto.getPhone());
+
+        if(!user.get().getPhone().equals(userDto.getPhone())){
+            if (Boolean.TRUE.equals(userRepository.existsByPhone(userDto.getPhone()))) {
+                return Response.build(Response.exist("user", "phone", userDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
+            }
+            user.get().setPhone(userDto.getPhone());
+        }
 
 //        log.info("email {} = {}", user.get().getEmail(), userDto.getEmail());
         if(!user.get().getEmail().equals(userDto.getEmail())){
@@ -109,6 +115,8 @@ public class UserService {
         String email = userDetails.getUsername();
         Optional<User> user = userRepository.findByEmail(email);
 
+//        user.get().setIsDeleted(true);
+//        userRepository.save(user.get());
         userRepository.deleteById(user.get().getId());
 
         return Response.build(Response.delete("user"), null, null, HttpStatus.CREATED);

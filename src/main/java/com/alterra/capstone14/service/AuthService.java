@@ -57,6 +57,10 @@ public class AuthService {
             return Response.build(Response.exist("user", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
         }
 
+        if (Boolean.TRUE.equals(userRepository.existsByPhone(userDto.getPhone()))) {
+            return Response.build(Response.exist("user", "phone", userDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
+        }
+
         User user = modelMapper.map(userDto, User.class);
         user.setPassword(encoder.encode(userDto.getPassword()));
 
