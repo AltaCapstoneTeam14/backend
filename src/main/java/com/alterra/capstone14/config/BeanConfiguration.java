@@ -1,4 +1,4 @@
-package com.alterra.capstone14.config.security;
+package com.alterra.capstone14.config;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
