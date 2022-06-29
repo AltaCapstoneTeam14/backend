@@ -1,7 +1,8 @@
 package com.alterra.capstone14.controller;
 
-import com.alterra.capstone14.domain.dto.NotificationDto;
+import com.alterra.capstone14.domain.dto.TransactionPulsaDto;
 import com.alterra.capstone14.domain.dto.TransactionDetailDto;
+import com.alterra.capstone14.domain.dto.TransactionTopupDto;
 import com.alterra.capstone14.service.TransactionDetailService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,16 +18,22 @@ public class TransactionDetailController {
     @Autowired
     TransactionDetailService transactionDetail;
 
-    @PostMapping("/gopay")
+    @PostMapping("/topup/gopay")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<Object> transactionWithGopay(@RequestBody TransactionDetailDto transactionDetailDto) throws JsonProcessingException {
-        return transactionDetail.createTransactionWithGopay(transactionDetailDto);
+    public ResponseEntity<Object> transactionWithGopay(@RequestBody TransactionTopupDto transactionTopupDto) throws JsonProcessingException {
+        return transactionDetail.createTopupWithGopay(transactionTopupDto);
     }
 
-    @PostMapping("/bank-transfer")
+    @PostMapping("/topup/bank-transfer")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<Object> transactionWithBankTransfer(@RequestBody TransactionDetailDto transactionDetailDto) throws JsonProcessingException {
-        return transactionDetail.createTransactionWithBankTranfer(transactionDetailDto);
+    public ResponseEntity<Object> topupWithBankTransfer(@RequestBody TransactionTopupDto transactionTopupDto) throws JsonProcessingException {
+        return transactionDetail.createTopupWithBankTranfer(transactionTopupDto);
+    }
+
+    @PostMapping("/pulsa")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<Object> buyPulsa(@RequestBody TransactionPulsaDto buyPulsaDto) throws JsonProcessingException {
+        return transactionDetail.buyPulsa(buyPulsaDto);
     }
 
     @PostMapping("/notification")

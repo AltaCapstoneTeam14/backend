@@ -5,6 +5,7 @@ import com.alterra.capstone14.domain.dto.TopupProductDto;
 import com.alterra.capstone14.repository.TopupProductRepository;
 import com.alterra.capstone14.util.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,20 +21,15 @@ public class TopupProductService {
     @Autowired
     TopupProductRepository topupProductRepository;
 
-    public ResponseEntity<Object> addTopupProduct(TopupProductDto topupProductDto) {
+    @Autowired
+    ModelMapper modelMapper;
 
-        TopupProduct topupProduct = TopupProduct.builder()
-                .amount(topupProductDto.getAmount())
-                .grossAmount(topupProductDto.getGrossAmount())
-                .build();
+    public ResponseEntity<Object> addTopupProduct(TopupProductDto topupProductDto) {
+        TopupProduct topupProduct = modelMapper.map(topupProductDto, TopupProduct.class);
 
         topupProductRepository.save(topupProduct);
 
-        TopupProductDto topupProductDto1 = TopupProductDto.builder()
-                .id(topupProduct.getId())
-                .amount(topupProduct.getAmount())
-                .grossAmount(topupProduct.getGrossAmount())
-                .build();
+        TopupProductDto topupProductDto1 = modelMapper.map(topupProduct, TopupProductDto.class);
 
         return Response.build(Response.add("topup product"), topupProductDto1, null, HttpStatus.CREATED);
     }

@@ -63,9 +63,15 @@ public class UserService {
         Optional<User> user = userRepository.findByEmail(email);
 
         user.get().setName(userDto.getName());
-        user.get().setPhone(userDto.getPhone());
 
-        log.info("email {} = {}", user.get().getEmail(), userDto.getEmail());
+        if(!user.get().getPhone().equals(userDto.getPhone())){
+            if (Boolean.TRUE.equals(userRepository.existsByPhone(userDto.getPhone()))) {
+                return Response.build(Response.exist("user", "phone", userDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
+            }
+            user.get().setPhone(userDto.getPhone());
+        }
+
+//        log.info("email {} = {}", user.get().getEmail(), userDto.getEmail());
         if(!user.get().getEmail().equals(userDto.getEmail())){
             if (Boolean.TRUE.equals(userRepository.existsByEmail(userDto.getEmail()))) {
                 return Response.build(Response.exist("user", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
@@ -74,7 +80,7 @@ public class UserService {
         }
         userRepository.save(user.get());
 
-        UserDto userDto1 = UserDto.builder()
+        UserNoPwdDto userNoPwdDto = UserNoPwdDto.builder()
                 .id(user.get().getId())
                 .name(user.get().getName())
                 .email(user.get().getEmail())
@@ -82,7 +88,7 @@ public class UserService {
                 .createdAt(user.get().getCreatedAt())
                 .build();
 
-        return Response.build(Response.update("user"), userDto1, null, HttpStatus.CREATED);
+        return Response.build(Response.update("user"), userNoPwdDto, null, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> updateUserPassword(PasswordDto passwordDto) {
@@ -93,7 +99,7 @@ public class UserService {
         user.get().setPassword(encoder.encode(passwordDto.getPassword()));
         userRepository.save(user.get());
 
-        UserDto userDto1 = UserDto.builder()
+        UserNoPwdDto userNoPwdDto = UserNoPwdDto.builder()
                 .id(user.get().getId())
                 .name(user.get().getName())
                 .email(user.get().getEmail())
@@ -101,7 +107,7 @@ public class UserService {
                 .createdAt(user.get().getCreatedAt())
                 .build();
 
-        return Response.build(Response.update("password"), userDto1, null, HttpStatus.CREATED);
+        return Response.build(Response.update("password"), userNoPwdDto, null, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> deleteUser() {
@@ -109,6 +115,8 @@ public class UserService {
         String email = userDetails.getUsername();
         Optional<User> user = userRepository.findByEmail(email);
 
+//        user.get().setIsDeleted(true);
+//        userRepository.save(user.get());
         userRepository.deleteById(user.get().getId());
 
         return Response.build(Response.delete("user"), null, null, HttpStatus.CREATED);

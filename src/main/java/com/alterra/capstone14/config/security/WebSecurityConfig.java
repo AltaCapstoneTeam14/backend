@@ -53,11 +53,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
-//    @Override
-//    public void configure(WebSecurity web) throws Exception {
-//        web.ignoring().antMatchers("/v2/api-docs", "/configuration/**", "/swagger-resources/**",  "/swagger-ui.html", "/webjars/**", "/api-docs/**");
-//    }
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
@@ -68,10 +63,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v1/users/**").permitAll()
                 .antMatchers( "/v1/admin/**").permitAll()
                 .antMatchers( "/v1/super-admin/**").permitAll()
-                .antMatchers( "/v1/topup-amount/**").permitAll()
-                .antMatchers( "/v1/topup/**").permitAll()
+//                .antMatchers( "/v1/topup-amount/**").permitAll()
+//                .antMatchers( "/v1/topup/**").permitAll()
                 .antMatchers( "/v1/notification/**").permitAll()
                 .antMatchers( "/v1/transactions/**").permitAll()
+                .antMatchers( "/v1/products/**").permitAll()
+                .antMatchers( "/v1/test/**").permitAll()
                 .anyRequest().authenticated();
 
         http.headers().frameOptions().disable();
