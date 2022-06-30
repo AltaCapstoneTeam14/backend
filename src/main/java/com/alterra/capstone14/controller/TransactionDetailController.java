@@ -2,6 +2,7 @@ package com.alterra.capstone14.controller;
 
 import com.alterra.capstone14.domain.dto.TransactionPulsaDto;
 import com.alterra.capstone14.domain.dto.TransactionDetailDto;
+import com.alterra.capstone14.domain.dto.TransactionQuotaDto;
 import com.alterra.capstone14.domain.dto.TransactionTopupDto;
 import com.alterra.capstone14.service.TransactionDetailService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,6 +35,12 @@ public class TransactionDetailController {
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<Object> buyPulsa(@RequestBody TransactionPulsaDto buyPulsaDto) throws JsonProcessingException {
         return transactionDetail.buyPulsa(buyPulsaDto);
+    }
+
+    @PostMapping("/quota")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<Object> buyQuota(@RequestBody TransactionQuotaDto transactionQuotaDto) throws JsonProcessingException {
+        return transactionDetail.buyQuota(transactionQuotaDto);
     }
 
     @PostMapping("/notification")

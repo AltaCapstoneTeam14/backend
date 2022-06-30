@@ -11,7 +11,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/v1/products/topup")
-public class ProductTopupController {
+public class TopupProductController {
     @Autowired
     TopupProductService topupAmountService;
 

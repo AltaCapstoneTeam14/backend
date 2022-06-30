@@ -45,7 +45,7 @@ public class PulsaProductService {
     }
 
     public ResponseEntity<Object> getPulsaProducts() {
-        List<PulsaProduct> pulsaProductList = pulsaProductRepository.findAll();
+        List<PulsaProduct> pulsaProductList = pulsaProductRepository.findAllSorted();
         List<PulsaProductDto> pulsaProductDtoList = new ArrayList<>();
 
         pulsaProductList.forEach(pulsaProduct -> {

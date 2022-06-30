@@ -1,9 +1,11 @@
 package com.alterra.capstone14.service;
 
 import com.alterra.capstone14.domain.dao.Balance;
+import com.alterra.capstone14.domain.dao.Coin;
 import com.alterra.capstone14.domain.dao.User;
 import com.alterra.capstone14.domain.dto.*;
 import com.alterra.capstone14.repository.BalanceRepository;
+import com.alterra.capstone14.repository.CoinRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.util.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,9 @@ public class UserService {
     @Autowired
     BalanceRepository balanceRepository;
 
+    @Autowired
+    CoinRepository coinRepository;
+
     public ResponseEntity<Object> getProfile() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
@@ -41,6 +46,13 @@ public class UserService {
             balance = Optional.of(newBalance);
         }
 
+        Optional<Coin> coin = coinRepository.findByUserId(user.get().getId());
+        if(coin.isEmpty()){
+            Coin newCoin = Coin.builder().user(user.get()).amount(0L).build();
+            coinRepository.save(newCoin);
+            coin = Optional.of(newCoin);
+        }
+
         UserWithBalanceDto userDto = UserWithBalanceDto.builder()
                 .id(user.get().getId())
                 .name(user.get().getName())
@@ -49,6 +61,10 @@ public class UserService {
                 .balance(BalanceDto.builder()
                         .id(balance.get().getId())
                         .amount(balance.get().getAmount())
+                        .build())
+                .coin(CoinDto.builder()
+                        .id(coin.get().getId())
+                        .amount(coin.get().getAmount())
                         .build())
                 .createdAt(user.get().getCreatedAt())
                 .updatedAt(user.get().getUpdatedAt())

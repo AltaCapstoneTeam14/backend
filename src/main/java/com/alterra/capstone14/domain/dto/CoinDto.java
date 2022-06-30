@@ -1,19 +1,19 @@
 package com.alterra.capstone14.domain.dto;
 
+import com.alterra.capstone14.domain.dao.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
-@EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserWithBalanceDto extends UserDto{
+public class CoinDto {
+    private Long id;
 
-    private BalanceDto balance;
+    private User user;
 
-    private CoinDto coin;
+    private Long amount;
 }
