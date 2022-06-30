@@ -2,15 +2,13 @@ package com.alterra.capstone14.service;
 
 import com.alterra.capstone14.constant.ERole;
 import com.alterra.capstone14.domain.common.ApiResponse;
-import com.alterra.capstone14.domain.dao.Balance;
-import com.alterra.capstone14.domain.dao.CustomUserDetails;
-import com.alterra.capstone14.domain.dao.Role;
-import com.alterra.capstone14.domain.dao.User;
+import com.alterra.capstone14.domain.dao.*;
 import com.alterra.capstone14.domain.dto.PasswordDto;
 import com.alterra.capstone14.domain.dto.UserDto;
 import com.alterra.capstone14.domain.dto.UserNoPwdDto;
 import com.alterra.capstone14.domain.dto.UserWithBalanceDto;
 import com.alterra.capstone14.repository.BalanceRepository;
+import com.alterra.capstone14.repository.CoinRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -48,6 +46,9 @@ public class UserServiceTest {
     @MockBean
     private BalanceRepository balanceRepository;
 
+    @MockBean
+    private CoinRepository coinRepository;
+
     @Autowired
     private UserService userService;
 
@@ -76,6 +77,7 @@ public class UserServiceTest {
                 .build();
 
         Balance balance = Balance.builder().id(1L).user(user).amount(0L).build();
+        Coin coin = Coin.builder().id(1L).user(user).amount(0L).build();
 
         CustomUserDetails userDetails = CustomUserDetails.build(user);
 
@@ -84,6 +86,7 @@ public class UserServiceTest {
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
         when(balanceRepository.findByUserId(any())).thenReturn(Optional.ofNullable(balance));
+        when(coinRepository.findByUserId(any())).thenReturn(Optional.ofNullable(coin));
 
         ResponseEntity<Object> response = userService.getProfile();
 
@@ -101,8 +104,9 @@ public class UserServiceTest {
         assertEquals("081999888999", data.getPhone());
         assertEquals(1L, data.getBalance().getId());
         assertEquals(0L, data.getBalance().getAmount());
+        assertEquals(1L, data.getCoin().getId());
+        assertEquals(0L, data.getCoin().getAmount());
         assertNotNull(data.getCreatedAt());
-
     }
 
     @Test

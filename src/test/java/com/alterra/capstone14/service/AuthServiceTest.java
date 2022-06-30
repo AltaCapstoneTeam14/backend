@@ -4,15 +4,13 @@ import com.alterra.capstone14.config.CustomAuthentication;
 import com.alterra.capstone14.config.security.JwtUtils;
 import com.alterra.capstone14.constant.ERole;
 import com.alterra.capstone14.domain.common.ApiResponse;
-import com.alterra.capstone14.domain.dao.Balance;
-import com.alterra.capstone14.domain.dao.Role;
-import com.alterra.capstone14.domain.dao.TopupProduct;
-import com.alterra.capstone14.domain.dao.User;
+import com.alterra.capstone14.domain.dao.*;
 import com.alterra.capstone14.domain.dto.LoginDto;
 import com.alterra.capstone14.domain.dto.TokenDto;
 import com.alterra.capstone14.domain.dto.UserDto;
 import com.alterra.capstone14.domain.dto.UserNoPwdDto;
 import com.alterra.capstone14.repository.BalanceRepository;
+import com.alterra.capstone14.repository.CoinRepository;
 import com.alterra.capstone14.repository.RoleRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import lombok.extern.java.Log;
@@ -58,6 +56,9 @@ public class AuthServiceTest {
     private BalanceRepository balanceRepository;
 
     @MockBean
+    private CoinRepository coinRepository;
+
+    @MockBean
     private PasswordEncoder encoder;
 
     @MockBean
@@ -98,12 +99,14 @@ public class AuthServiceTest {
                 .build();
 
         Balance balance = Balance.builder().user(user).amount(0L).build();
+        Coin coin = Coin.builder().id(1L).user(user).amount(0L).build();
 
         when(userRepository.existsByEmail("hamid@gmail.com")).thenReturn(false);
         when(modelMapper.map(any(), eq(User.class))).thenReturn(user);
         when(roleRepository.findByName(ERole.USER)).thenReturn(Optional.ofNullable(userRole));
         when(userRepository.save(user)).thenReturn(user);
         when(balanceRepository.save(balance)).thenReturn(balance);
+        when(coinRepository.save(coin)).thenReturn(coin);
 
         ResponseEntity<Object> response = authService.registerUser(userDto);
 

@@ -81,7 +81,7 @@ public class TopupProdctServiceTest {
         List<TopupProduct> topupProductList = new ArrayList<>();
         topupProductList.add(topupProduct);
 
-        when(topupProductRepository.findAll()).thenReturn(topupProductList);
+        when(topupProductRepository.findAllSorted()).thenReturn(topupProductList);
 
         ResponseEntity<Object> response = topupProductService.getTopupProducts();
 
