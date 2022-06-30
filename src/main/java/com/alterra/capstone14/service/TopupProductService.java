@@ -35,7 +35,7 @@ public class TopupProductService {
     }
 
     public ResponseEntity<Object> getTopupProducts() {
-        List<TopupProduct> topupProductList = topupProductRepository.findAll();
+        List<TopupProduct> topupProductList = topupProductRepository.findAllSorted();
         List<TopupProductDto> topupProductDtoList = new ArrayList<>();
 
         topupProductList.forEach(amount -> {

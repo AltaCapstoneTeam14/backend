@@ -55,4 +55,8 @@ public class User extends BaseIsDeleted {
     @JsonIgnore
     @OneToOne(mappedBy = "user")
     private Balance balance;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "user")
+    private Coin coin;
 }
