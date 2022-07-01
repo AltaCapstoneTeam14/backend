@@ -23,8 +23,14 @@ public class TopupProductController {
 
     @PostMapping("")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Object> addTopupProduct(@Valid @RequestBody TopupProductDto topupAmountDto) {
-        return topupAmountService.addTopupProduct(topupAmountDto);
+    public ResponseEntity<Object> addTopupProduct(@Valid @RequestBody TopupProductDto topupProductDto) {
+        return topupAmountService.addTopupProduct(topupProductDto);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Object> updateTopupProduct(@Valid @RequestBody TopupProductDto topupProductDto, @PathVariable Long id) {
+        return topupAmountService.updateTopupProduct(topupProductDto, id);
     }
 
     @DeleteMapping("/{id}")
