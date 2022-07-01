@@ -63,6 +63,9 @@ public class TransactionDetailService {
     TransactionDetailQuotaRepository transactionDetailQuotaRepository;
 
     @Autowired
+    CashoutProductRepository cashoutProductRepository;
+
+    @Autowired
     ModelMapper modelMapper;
 
     @Value("${project.env:development}")
@@ -236,15 +239,15 @@ public class TransactionDetailService {
             return Response.build("user balance not enough", null, null, HttpStatus.BAD_REQUEST);
         }
 
+        Long coinEarned = (pulsaProduct.get().getGrossAmount()/500);
+
         user.get().getBalance().setAmount(user.get().getBalance().getAmount()-pulsaProduct.get().getGrossAmount());
-        user.get().getCoin().setAmount(user.get().getCoin().getAmount()+(pulsaProduct.get().getGrossAmount()/500));
+        user.get().getCoin().setAmount(user.get().getCoin().getAmount()+coinEarned);
         userRepository.save(user.get());
 
         pulsaProduct.get().setStock(pulsaProduct.get().getStock()-1);
         pulsaProductRepository.save(pulsaProduct.get());
 
-        // create topup detail and add to db
-        // bank_transfer either bca, bni / bri
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.BALANCE.value)
                 .transferMethod(EPaymentType.BALANCE.value)
@@ -261,19 +264,19 @@ public class TransactionDetailService {
 
         TransactionDetailPulsa transactionDetailPulsa = TransactionDetailPulsa.builder()
                 .phone(buyPulsaDto.getPhone())
-//                .status(EPulsaQuotaStatus.SUCCESS.value)
                 .transactionDetail(transactionDetail)
                 .build();
 
         transactionDetailPulsaRepository.save(transactionDetailPulsa);
 
-        TransactionDetailDto transactionDetailDto = TransactionDetailDto.builder()
+        TransactionDetailWithCoinDto transactionDetailDto = TransactionDetailWithCoinDto.builder()
                 .id(transactionDetail.getId())
                 .orderId(transactionDetail.getOrderId())
                 .status(transactionDetail.getStatus())
                 .productType(transactionDetail.getProductType())
                 .productId(transactionDetail.getProductId())
                 .grossAmount(transactionDetail.getGrossAmount())
+                .coinEarned(coinEarned)
                 .createdAt(transactionDetail.getCreatedAt())
                 .build();
 
@@ -299,8 +302,10 @@ public class TransactionDetailService {
             return Response.build("user balance not enough", null, null, HttpStatus.BAD_REQUEST);
         }
 
+        Long coinEarned = (quotaProduct.get().getGrossAmount()/500);
+
         user.get().getBalance().setAmount(user.get().getBalance().getAmount()-quotaProduct.get().getGrossAmount());
-        user.get().getCoin().setAmount(user.get().getCoin().getAmount()+(quotaProduct.get().getGrossAmount()/500));
+        user.get().getCoin().setAmount(user.get().getCoin().getAmount()+coinEarned);
         userRepository.save(user.get());
 
         quotaProduct.get().setStock(quotaProduct.get().getStock()-1);
@@ -330,6 +335,53 @@ public class TransactionDetailService {
 
         transactionDetailQuotaRepository.save(transactionDetailQuota);
 
+        TransactionDetailWithCoinDto transactionDetailDto = TransactionDetailWithCoinDto.builder()
+                .id(transactionDetail.getId())
+                .orderId(transactionDetail.getOrderId())
+                .status(transactionDetail.getStatus())
+                .productType(transactionDetail.getProductType())
+                .productId(transactionDetail.getProductId())
+                .grossAmount(transactionDetail.getGrossAmount())
+                .coinEarned(coinEarned)
+                .createdAt(transactionDetail.getCreatedAt())
+                .build();
+
+        return Response.build("Buy quota success", transactionDetailDto, null, HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<Object> cashoutCoinToBalance(TransactionCashoutDto transactionCashoutDto) throws JsonProcessingException {
+        // get user logged in
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        Optional<User> user = userRepository.findByEmail(email);
+
+        Optional<CashoutProduct> cashoutProduct = cashoutProductRepository.findById(transactionCashoutDto.getProductId());
+        if(cashoutProduct.isEmpty()){
+            return Response.build(Response.notFound("product cashout"), null, null, HttpStatus.BAD_REQUEST);
+        }
+
+        if(user.get().getCoin().getAmount().compareTo(cashoutProduct.get().getCoinAmount()) < 0 ){
+            return Response.build("user coin not enough", null, null, HttpStatus.BAD_REQUEST);
+        }
+
+        user.get().getBalance().setAmount(user.get().getBalance().getAmount()+cashoutProduct.get().getBalanceAmount());
+        user.get().getCoin().setAmount(user.get().getCoin().getAmount()-cashoutProduct.get().getCoinAmount());
+        userRepository.save(user.get());
+
+        TransactionDetail transactionDetail = TransactionDetail.builder()
+                .paymentType(EPaymentType.COIN.value)
+                .transferMethod(EPaymentType.COIN.value)
+                .user(user.get())
+                .productType(EProductType.CASHOUT.value)
+                .productId(transactionCashoutDto.getProductId())
+                .grossAmount(cashoutProduct.get().getCoinAmount())
+                .status(ETransactionDBStatus.SUCCESS.value)
+                .build();
+
+        transactionDetailRepository.save(transactionDetail);
+        transactionDetail.setOrderId(orderIdPrefix + "-" + transactionDetail.getId());
+        transactionDetailRepository.save(transactionDetail);
+
         TransactionDetailDto transactionDetailDto = TransactionDetailDto.builder()
                 .id(transactionDetail.getId())
                 .orderId(transactionDetail.getOrderId())
@@ -340,7 +392,7 @@ public class TransactionDetailService {
                 .createdAt(transactionDetail.getCreatedAt())
                 .build();
 
-        return Response.build("Buy quota success", transactionDetailDto, null, HttpStatus.CREATED);
+        return Response.build("Cashout coin to balance success", transactionDetailDto, null, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> getNotification(String stringNotificationDto) throws JsonProcessingException {

@@ -25,7 +25,6 @@ public class TransactionDetailDto extends BaseCreatedAt {
 
     private UserDto user;
 
-//    @NotBlank(message = "product_type is required!")
     @JsonProperty("product_type")
     private String productType;
 
