@@ -17,7 +17,7 @@ public class ProviderController {
     ProviderService providerService;
 
     @GetMapping("")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<Object> getProviderList() {
         return providerService.getProviders();
     }
