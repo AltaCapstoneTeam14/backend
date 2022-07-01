@@ -10,6 +10,9 @@ import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.util.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -87,7 +90,6 @@ public class UserService {
             user.get().setPhone(userDto.getPhone());
         }
 
-//        log.info("email {} = {}", user.get().getEmail(), userDto.getEmail());
         if(!user.get().getEmail().equals(userDto.getEmail())){
             if (Boolean.TRUE.equals(userRepository.existsByEmail(userDto.getEmail()))) {
                 return Response.build(Response.exist("user", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
@@ -131,8 +133,6 @@ public class UserService {
         String email = userDetails.getUsername();
         Optional<User> user = userRepository.findByEmail(email);
 
-//        user.get().setIsDeleted(true);
-//        userRepository.save(user.get());
         userRepository.deleteById(user.get().getId());
 
         return Response.build(Response.delete("user"), null, null, HttpStatus.CREATED);

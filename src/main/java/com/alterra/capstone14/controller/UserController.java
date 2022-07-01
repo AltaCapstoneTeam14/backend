@@ -17,7 +17,7 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @GetMapping("")
+    @GetMapping("/profile")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<Object> getProfile() {
         return userService.getProfile();
@@ -40,4 +40,5 @@ public class UserController {
     public ResponseEntity<Object> delete() {
         return userService.deleteUser();
     }
+
 }
