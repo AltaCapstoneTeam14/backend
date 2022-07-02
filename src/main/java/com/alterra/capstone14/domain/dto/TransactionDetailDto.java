@@ -45,7 +45,4 @@ public class TransactionDetailDto extends BaseCreatedAt {
     private String transferMethod;
 
     private String status;
-
-    @JsonProperty("json_notification")
-    private String jsonNotification;
 }

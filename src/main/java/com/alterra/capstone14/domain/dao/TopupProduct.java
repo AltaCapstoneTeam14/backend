@@ -17,6 +17,9 @@ public class TopupProduct {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "amount", nullable = false)
     private Long amount;
 

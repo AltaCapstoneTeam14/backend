@@ -33,7 +33,6 @@ public class TransactionDetail extends BaseCreatedAt {
     private String orderId;
 
     @Column(name = "product_type", nullable = false)
-//    @Enumerated(EnumType.STRING)
     private String productType;
 
     @Column(name = "product_id", nullable = false)
@@ -43,17 +42,11 @@ public class TransactionDetail extends BaseCreatedAt {
     private Long grossAmount;
 
     @Column(name = "payment_type", nullable = false)
-    //    @Enumerated(EnumType.STRING)
     private String paymentType;
 
     @Column(name = "transfer_method", nullable = false)
-    //    @Enumerated(EnumType.STRING)
     private String transferMethod;
 
     @Column(name = "status", nullable = false)
     private String status;
-    
-    @Lob
-    @Column(name = "json_notification")
-    private String jsonNotification;
 }

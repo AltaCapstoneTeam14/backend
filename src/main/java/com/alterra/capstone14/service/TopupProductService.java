@@ -41,12 +41,13 @@ public class TopupProductService {
         List<TopupProduct> topupProductList = topupProductRepository.findAllSorted();
         List<TopupProductDto> topupProductDtoList = new ArrayList<>();
 
-        topupProductList.forEach(amount -> {
+        topupProductList.forEach(topupProduct -> {
             topupProductDtoList.add(
                     TopupProductDto.builder()
-                            .id(amount.getId())
-                            .amount(amount.getAmount())
-                            .grossAmount(amount.getGrossAmount())
+                            .id(topupProduct.getId())
+                            .name(topupProduct.getName())
+                            .amount(topupProduct.getAmount())
+                            .grossAmount(topupProduct.getGrossAmount())
                             .build()
             );
         });
@@ -60,6 +61,7 @@ public class TopupProductService {
             return Response.build(Response.notFound("topup product"), null, null, HttpStatus.BAD_REQUEST);
         }
 
+        topupProduct.get().setName(topupProductDto.getName());
         topupProduct.get().setAmount(topupProductDto.getAmount());
         topupProduct.get().setGrossAmount(topupProductDto.getGrossAmount());
         topupProductRepository.save(topupProduct.get());
@@ -80,3 +82,5 @@ public class TopupProductService {
         return Response.build(Response.delete("topup product"), null, null, HttpStatus.CREATED);
     }
 }
+
+

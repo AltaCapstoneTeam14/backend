@@ -9,11 +9,11 @@ import com.alterra.capstone14.domain.resBody.BankChargeRes;
 import com.alterra.capstone14.domain.resBody.GopayChargeRes;
 import com.alterra.capstone14.repository.*;
 import com.alterra.capstone14.util.Encryptor;
+import com.alterra.capstone14.util.RandomString;
 import com.alterra.capstone14.util.Response;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
@@ -63,13 +64,10 @@ public class TransactionDetailService {
     TransactionDetailQuotaRepository transactionDetailQuotaRepository;
 
     @Autowired
-    CashoutProductRepository cashoutProductRepository;
+    TransactionDetailTopupRepository transactionDetailTopupRepository;
 
     @Autowired
-    ModelMapper modelMapper;
-
-    @Value("${project.env:development}")
-    private String projectEnv;
+    CashoutProductRepository cashoutProductRepository;
 
     WebClient webClient = WebClient.create();
 
@@ -97,12 +95,14 @@ public class TransactionDetailService {
         }
 
         // create topup detail and add to db
+        String orderId = RandomString.generate(orderIdPrefix);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.GOPAY.value)
                 .transferMethod(EPaymentType.GOPAY.value)
                 .user(user.get())
                 .productType(EProductType.TOPUP.value)
                 .productId(transactionTopupDto.getProductId())
+                .orderId(orderId)
                 .grossAmount(topupProduct.get().getGrossAmount())
                 .status(ETransactionDBStatus.CREATED.value)
                 .build();
@@ -111,7 +111,7 @@ public class TransactionDetailService {
 
         GopayBody gopayBody = GopayBody.builder()
                 .paymentType(transactionDetail.getPaymentType())
-                .orderId(orderIdPrefix + "-" + transactionDetail.getId().toString())
+                .orderId(transactionDetail.getOrderId())
                 .grossAmount(transactionDetail.getGrossAmount())
                 .build();
 
@@ -127,14 +127,16 @@ public class TransactionDetailService {
                 .bodyToMono(String.class)
                 .block();
 
-        log.info("response : {}", response);
+        log.info("response web client : {}", response);
 
         GopayChargeRes gopayChargeRes = new ObjectMapper().readValue(response, GopayChargeRes.class);
         if(gopayChargeRes.getStatusCode().equals(String.valueOf(HttpStatus.CREATED.value()))){
             transactionDetail.setStatus(gopayChargeRes.getTransactionStatus());
-            transactionDetail.setOrderId(gopayChargeRes.getOrderId());
-            transactionDetail.setJsonNotification(response);
             transactionDetailRepository.save(transactionDetail);
+            transactionDetailTopupRepository.save(TransactionDetailTopup.builder()
+                    .transactionDetail(transactionDetail)
+                    .jsonNotification(response)
+                    .build());
         }else {
             return Response.build("internal server error", null, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -161,11 +163,13 @@ public class TransactionDetailService {
 
         // create topup detail and add to db
         // bank_transfer either bca, bni / bri
+        String orderId = RandomString.generate(orderIdPrefix);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.BANK_TRANSFER.value)
                 .user(user.get())
                 .productType(EProductType.TOPUP.value)
                 .productId(transactionTopupDto.getProductId())
+                .orderId(orderId)
                 .grossAmount(topupProduct.get().getGrossAmount())
                 .status(ETransactionDBStatus.CREATED.value)
                 .build();
@@ -182,7 +186,7 @@ public class TransactionDetailService {
 
         BankTransferBody bankTransferBody = BankTransferBody.builder()
                 .paymentType(transactionDetail.getPaymentType())
-                .orderId(orderIdPrefix + "-" + transactionDetail.getId().toString())
+                .orderId(transactionDetail.getOrderId())
                 .grossAmount(transactionDetail.getGrossAmount())
                 .bank(transactionDetail.getTransferMethod())
                 .build();
@@ -203,9 +207,11 @@ public class TransactionDetailService {
         BankChargeRes bankChargeRes = new ObjectMapper().readValue(response, BankChargeRes.class);
         if(bankChargeRes.getStatusCode().equals(String.valueOf(HttpStatus.CREATED.value()))){
             transactionDetail.setStatus(bankChargeRes.getTransactionStatus());
-            transactionDetail.setOrderId(bankChargeRes.getOrderId());
-            transactionDetail.setJsonNotification(response);
             transactionDetailRepository.save(transactionDetail);
+            transactionDetailTopupRepository.save(TransactionDetailTopup.builder()
+                    .transactionDetail(transactionDetail)
+                    .jsonNotification(response)
+                    .build());
         }else {
             return Response.build("internal server error", null, null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -231,7 +237,7 @@ public class TransactionDetailService {
             return Response.build(Response.notFound("product pulsa"), null, null, HttpStatus.BAD_REQUEST);
         }
 
-        if(pulsaProduct.isPresent() && pulsaProduct.get().getStock().compareTo(0L) <= 0){
+        if(pulsaProduct.get().getStock().compareTo(0L) <= 0){
             return Response.build("Product is empty", null, null, HttpStatus.BAD_REQUEST);
         }
 
@@ -248,25 +254,24 @@ public class TransactionDetailService {
         pulsaProduct.get().setStock(pulsaProduct.get().getStock()-1);
         pulsaProductRepository.save(pulsaProduct.get());
 
+        String orderId = RandomString.generate(orderIdPrefix);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.BALANCE.value)
                 .transferMethod(EPaymentType.BALANCE.value)
                 .user(user.get())
                 .productType(EProductType.PULSA.value)
                 .productId(buyPulsaDto.getProductId())
+                .orderId(orderId)
                 .grossAmount(pulsaProduct.get().getGrossAmount())
                 .status(ETransactionDBStatus.SUCCESS.value)
                 .build();
 
-        transactionDetailRepository.save(transactionDetail);
-        transactionDetail.setOrderId(orderIdPrefix + "-" + transactionDetail.getId());
         transactionDetailRepository.save(transactionDetail);
 
         TransactionDetailPulsa transactionDetailPulsa = TransactionDetailPulsa.builder()
                 .phone(buyPulsaDto.getPhone())
                 .transactionDetail(transactionDetail)
                 .build();
-
         transactionDetailPulsaRepository.save(transactionDetailPulsa);
 
         TransactionDetailWithCoinDto transactionDetailDto = TransactionDetailWithCoinDto.builder()
@@ -294,7 +299,7 @@ public class TransactionDetailService {
             return Response.build(Response.notFound("product quota"), null, null, HttpStatus.BAD_REQUEST);
         }
 
-        if(quotaProduct.isPresent() && quotaProduct.get().getStock().compareTo(0L) <= 0){
+        if(quotaProduct.get().getStock().compareTo(0L) <= 0){
             return Response.build("Product is empty", null, null, HttpStatus.BAD_REQUEST);
         }
 
@@ -311,28 +316,23 @@ public class TransactionDetailService {
         quotaProduct.get().setStock(quotaProduct.get().getStock()-1);
         quotaProductRepository.save(quotaProduct.get());
 
-        // create topup detail and add to db
-        // bank_transfer either bca, bni / bri
+        String orderId = RandomString.generate(orderIdPrefix);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.BALANCE.value)
                 .transferMethod(EPaymentType.BALANCE.value)
                 .user(user.get())
                 .productType(EProductType.QUOTA.value)
                 .productId(transactionQuotaDto.getProductId())
+                .orderId(orderId)
                 .grossAmount(quotaProduct.get().getGrossAmount())
                 .status(ETransactionDBStatus.SUCCESS.value)
                 .build();
-
-        transactionDetailRepository.save(transactionDetail);
-        transactionDetail.setOrderId(orderIdPrefix + "-" + transactionDetail.getId());
         transactionDetailRepository.save(transactionDetail);
 
         TransactionDetailQuota transactionDetailQuota = TransactionDetailQuota.builder()
                 .phone(transactionQuotaDto.getPhone())
-//                .status(EPulsaQuotaStatus.SUCCESS.value)
                 .transactionDetail(transactionDetail)
                 .build();
-
         transactionDetailQuotaRepository.save(transactionDetailQuota);
 
         TransactionDetailWithCoinDto transactionDetailDto = TransactionDetailWithCoinDto.builder()
@@ -368,18 +368,18 @@ public class TransactionDetailService {
         user.get().getCoin().setAmount(user.get().getCoin().getAmount()-cashoutProduct.get().getCoinAmount());
         userRepository.save(user.get());
 
+        String orderId = RandomString.generate(orderIdPrefix);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.COIN.value)
                 .transferMethod(EPaymentType.COIN.value)
                 .user(user.get())
                 .productType(EProductType.CASHOUT.value)
                 .productId(transactionCashoutDto.getProductId())
+                .orderId(orderId)
                 .grossAmount(cashoutProduct.get().getCoinAmount())
                 .status(ETransactionDBStatus.SUCCESS.value)
                 .build();
 
-        transactionDetailRepository.save(transactionDetail);
-        transactionDetail.setOrderId(orderIdPrefix + "-" + transactionDetail.getId());
         transactionDetailRepository.save(transactionDetail);
 
         TransactionDetailDto transactionDetailDto = TransactionDetailDto.builder()
@@ -395,6 +395,7 @@ public class TransactionDetailService {
         return Response.build("Cashout coin to balance success", transactionDetailDto, null, HttpStatus.CREATED);
     }
 
+    @Transactional
     public ResponseEntity<Object> getNotification(String stringNotificationDto) throws JsonProcessingException {
         log.info("string notif {}", stringNotificationDto);
         NotificationDto notificationDto = objectMapper.readValue(stringNotificationDto, NotificationDto.class);
@@ -417,12 +418,20 @@ public class TransactionDetailService {
                 notificationDto.getTransactionStatus(),
                 notificationDto.getFraudStatus());
 
-        Long transactionDetailId = Long.parseLong(notificationDto.getOrderId().split("-", 2)[1]);
-//        log.info("transaction id {}", transactionDetailId);
-        Optional<TransactionDetail> transactionDetail = transactionDetailRepository.findById(transactionDetailId);
+//        Long transactionDetailId = Long.parseLong(notificationDto.getOrderId().split("-", 2)[1]);
+        Optional<TransactionDetail> transactionDetail = transactionDetailRepository.findByOrderId(notificationDto.getOrderId());
         if(transactionDetail.isEmpty()){
-            return Response.build(Response.notFound("order_id"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("transaction detail"), null, null, HttpStatus.BAD_REQUEST);
         }
+        log.info(transactionDetail.get().getStatus());
+        Optional<TransactionDetailTopup> transactionDetailTopup = transactionDetailTopupRepository.findByTransactionDetailId(transactionDetail.get().getId());
+        if(transactionDetailTopup.isEmpty()){
+            return Response.build(Response.notFound("transaction detail topup"), null, null, HttpStatus.BAD_REQUEST);
+        }
+        log.info(String.valueOf(transactionDetailTopup.get().getJsonNotification()));
+        transactionDetailTopup.get().setJsonNotification(stringNotificationDto);
+        transactionDetailTopupRepository.save(transactionDetailTopup.get());
+
         if(notificationDto.getTransactionStatus().equals(ETransactionStatus.CAPTURE.value)){
             if(notificationDto.getFraudStatus().equals(EFraudStatus.CHALLENGE.value)){
                 transactionDetail.get().setStatus(ETransactionDBStatus.CHALLENGE.value);
@@ -445,40 +454,39 @@ public class TransactionDetailService {
             transactionDetailRepository.save(transactionDetail.get());
         }
 
-        if(transactionDetail.get().getProductType().equals(EProductType.TOPUP.value)) {
-            if(transactionDetail.get().getStatus().equals(ETransactionDBStatus.SUCCESS.value)){
-                Optional<TopupProduct> productTopup = topupProductRepository.findById(transactionDetail.get().getProductId());
-                Optional<Balance> balance = balanceRepository.findByUserId(transactionDetail.get().getUser().getId());
-                if (balance.isEmpty()) {
-                    Balance newBalance = Balance.builder()
-                            .user(transactionDetail.get().getUser())
-                            .amount(productTopup.get().getAmount())
-                            .build();
-                    balanceRepository.save(newBalance);
-                    log.info("User balance : {}", newBalance.getAmount());
-                } else {
-                    balance.get().setAmount(balance.get().getAmount() + productTopup.get().getAmount());
-                    balanceRepository.save(balance.get());
-                    log.info("User balance : {}", balance.get().getAmount());
-                }
-                Optional<Coin> coin = coinRepository.findByUserId(transactionDetail.get().getUser().getId());
-                if (coin.isEmpty()) {
-                    Coin newCoin = Coin.builder()
-                            .user(transactionDetail.get().getUser())
-                            .amount(productTopup.get().getGrossAmount()/500)
-                            .build();
-                    coinRepository.save(newCoin);
-                    log.info("User coin : {}", newCoin.getAmount());
-                } else {
-                    coin.get().setAmount(coin.get().getAmount() + (productTopup.get().getGrossAmount()/500));
-                    coinRepository.save(coin.get());
-                    log.info("User coin : {}", coin.get().getAmount());
-                }
+        if(transactionDetail.get().getStatus().equals(ETransactionDBStatus.SUCCESS.value)){
+            Optional<TopupProduct> productTopup = topupProductRepository.findById(transactionDetail.get().getProductId());
+            Optional<Balance> balance = balanceRepository.findByUserId(transactionDetail.get().getUser().getId());
+            if (balance.isEmpty()) {
+                Balance newBalance = Balance.builder()
+                        .user(transactionDetail.get().getUser())
+                        .amount(productTopup.get().getAmount())
+                        .build();
+                balanceRepository.save(newBalance);
+                log.info("User balance : {}", newBalance.getAmount());
+            } else {
+                balance.get().setAmount(balance.get().getAmount() + productTopup.get().getAmount());
+                balanceRepository.save(balance.get());
+                log.info("User balance : {}", balance.get().getAmount());
+            }
+
+            Optional<Coin> coin = coinRepository.findByUserId(transactionDetail.get().getUser().getId());
+            if (coin.isEmpty()) {
+                Coin newCoin = Coin.builder()
+                        .user(transactionDetail.get().getUser())
+                        .amount(productTopup.get().getGrossAmount()/500)
+                        .build();
+                coinRepository.save(newCoin);
+                log.info("User coin : {}", newCoin.getAmount());
+            } else {
+                coin.get().setAmount(coin.get().getAmount() + (productTopup.get().getGrossAmount()/500));
+                coinRepository.save(coin.get());
+                log.info("User coin : {}", coin.get().getAmount());
             }
         }
 
         log.info("Transaction status : {}", transactionDetail.get().getStatus());
 
-        return Response.build(Response.update("topup detail"), null, null, HttpStatus.OK);
+        return Response.build(Response.update("transaction detail"), null, null, HttpStatus.OK);
     }
 }
