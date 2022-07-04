@@ -69,6 +69,21 @@ public class TransactionDetailService {
     @Autowired
     CashoutProductRepository cashoutProductRepository;
 
+    @Autowired
+    TransactionHistoryRepository transactionHistoryRepository;
+
+    @Autowired
+    TransactionHistoryCashoutRepository transactionHistoryCashoutRepository;
+
+    @Autowired
+    TransactionHistoryTopupRepository transactionHistoryTopupRepository;
+
+    @Autowired
+    TransactionHistoryPulsaRepository transactionHistoryPulsaRepository;
+
+    @Autowired
+    TransactionHistoryQuotaRepository transactionHistoryQuotaRepository;
+
     WebClient webClient = WebClient.create();
 
     @Value("${midtrans.baseurl}")
@@ -147,6 +162,28 @@ public class TransactionDetailService {
                 .status(transactionDetail.getStatus())
                 .build();
 
+
+        //create transaction history
+        TransactionHistoryTopup transactionHistoryTopup = TransactionHistoryTopup.builder()
+                .amount(topupProduct.get().getAmount())
+                .jsonNotification(response)
+                .build();
+        transactionHistoryTopupRepository.save(transactionHistoryTopup);
+
+        transactionHistoryRepository.save(TransactionHistory.builder()
+                .userId(user.get().getId())
+                .orderId(transactionDetail.getOrderId())
+                .transactionDetailId(transactionDetail.getId())
+                .productType(transactionDetail.getProductType())
+                .productHistoryId(transactionHistoryTopup.getId())
+                .name(topupProduct.get().getName())
+                .grossAmount(transactionDetail.getGrossAmount())
+                .status(gopayChargeRes.getTransactionStatus())
+                .paymentType(transactionDetail.getPaymentType())
+                .transferMethod(transactionDetail.getTransferMethod())
+                .createdAt(transactionDetail.getCreatedAt())
+                .build());
+
         return Response.build(Response.create("transaction gopay"), gopayChargeDto, null, HttpStatus.CREATED);
     }
 
@@ -223,6 +260,27 @@ public class TransactionDetailService {
                 .vaNumber(bankChargeRes.getVaNumberList().get(0).getVaNumber())
                 .build();
 
+        //create transaction history
+        TransactionHistoryTopup transactionHistoryTopup = TransactionHistoryTopup.builder()
+                .amount(topupProduct.get().getAmount())
+                .jsonNotification(response)
+                .build();
+        transactionHistoryTopupRepository.save(transactionHistoryTopup);
+
+        transactionHistoryRepository.save(TransactionHistory.builder()
+                .userId(user.get().getId())
+                .orderId(transactionDetail.getOrderId())
+                .transactionDetailId(transactionDetail.getId())
+                .productType(transactionDetail.getProductType())
+                .productHistoryId(transactionHistoryTopup.getId())
+                .name(topupProduct.get().getName())
+                .grossAmount(transactionDetail.getGrossAmount())
+                .status(bankChargeRes.getTransactionStatus())
+                .paymentType(transactionDetail.getPaymentType())
+                .transferMethod(transactionDetail.getTransferMethod())
+                .createdAt(transactionDetail.getCreatedAt())
+                .build());
+
         return Response.build(Response.create("transaction bank transfer"), bankChargeDto, null, HttpStatus.CREATED);
     }
 
@@ -285,6 +343,28 @@ public class TransactionDetailService {
                 .createdAt(transactionDetail.getCreatedAt())
                 .build();
 
+        //create transaction history
+        TransactionHistoryPulsa transactionHistoryPulsa = TransactionHistoryPulsa.builder()
+                .provider(pulsaProduct.get().getProvider().getName())
+                .denom(pulsaProduct.get().getDenom())
+                .phone(transactionDetailPulsa.getPhone())
+                .build();
+        transactionHistoryPulsaRepository.save(transactionHistoryPulsa);
+
+        transactionHistoryRepository.save(TransactionHistory.builder()
+                .userId(user.get().getId())
+                .orderId(transactionDetail.getOrderId())
+                .transactionDetailId(transactionDetail.getId())
+                .productType(transactionDetail.getProductType())
+                .productHistoryId(transactionHistoryPulsa.getId())
+                .name(pulsaProduct.get().getName())
+                .grossAmount(transactionDetail.getGrossAmount())
+                .status(transactionDetail.getStatus())
+                .paymentType(transactionDetail.getPaymentType())
+                .transferMethod(transactionDetail.getTransferMethod())
+                .createdAt(transactionDetail.getCreatedAt())
+                .build());
+
         return Response.build("Buy pulsa success", transactionDetailDto, null, HttpStatus.CREATED);
     }
 
@@ -346,6 +426,28 @@ public class TransactionDetailService {
                 .createdAt(transactionDetail.getCreatedAt())
                 .build();
 
+        //create transaction history
+        TransactionHistoryQuota transactionHistoryQuota = TransactionHistoryQuota.builder()
+                .provider(quotaProduct.get().getProvider().getName())
+                .description(quotaProduct.get().getDescription())
+                .phone(transactionDetailQuota.getPhone())
+                .build();
+        transactionHistoryQuotaRepository.save(transactionHistoryQuota);
+
+        transactionHistoryRepository.save(TransactionHistory.builder()
+                .userId(user.get().getId())
+                .orderId(transactionDetail.getOrderId())
+                .transactionDetailId(transactionDetail.getId())
+                .productType(transactionDetail.getProductType())
+                .productHistoryId(transactionHistoryQuota.getId())
+                .name(quotaProduct.get().getName())
+                .grossAmount(transactionDetail.getGrossAmount())
+                .status(transactionDetail.getStatus())
+                .paymentType(transactionDetail.getPaymentType())
+                .transferMethod(transactionDetail.getTransferMethod())
+                .createdAt(transactionDetail.getCreatedAt())
+                .build());
+
         return Response.build("Buy quota success", transactionDetailDto, null, HttpStatus.CREATED);
     }
 
@@ -392,6 +494,26 @@ public class TransactionDetailService {
                 .createdAt(transactionDetail.getCreatedAt())
                 .build();
 
+        //create transaction history
+        TransactionHistoryCashout transactionHistoryCashout = TransactionHistoryCashout.builder()
+                .balanceAmount(cashoutProduct.get().getBalanceAmount())
+                .build();
+        transactionHistoryCashoutRepository.save(transactionHistoryCashout);
+
+        transactionHistoryRepository.save(TransactionHistory.builder()
+                .userId(user.get().getId())
+                .orderId(transactionDetail.getOrderId())
+                .transactionDetailId(transactionDetail.getId())
+                .productType(transactionDetail.getProductType())
+                .productHistoryId(transactionHistoryCashout.getId())
+                .name(cashoutProduct.get().getName())
+                .grossAmount(transactionDetail.getGrossAmount())
+                .status(transactionDetail.getStatus())
+                .paymentType(transactionDetail.getPaymentType())
+                .transferMethod(transactionDetail.getTransferMethod())
+                .createdAt(transactionDetail.getCreatedAt())
+                .build());
+
         return Response.build("Cashout coin to balance success", transactionDetailDto, null, HttpStatus.CREATED);
     }
 
@@ -418,17 +540,16 @@ public class TransactionDetailService {
                 notificationDto.getTransactionStatus(),
                 notificationDto.getFraudStatus());
 
-//        Long transactionDetailId = Long.parseLong(notificationDto.getOrderId().split("-", 2)[1]);
         Optional<TransactionDetail> transactionDetail = transactionDetailRepository.findByOrderId(notificationDto.getOrderId());
         if(transactionDetail.isEmpty()){
             return Response.build(Response.notFound("transaction detail"), null, null, HttpStatus.BAD_REQUEST);
         }
-        log.info(transactionDetail.get().getStatus());
+//        log.info(transactionDetail.get().getStatus());
         Optional<TransactionDetailTopup> transactionDetailTopup = transactionDetailTopupRepository.findByTransactionDetailId(transactionDetail.get().getId());
         if(transactionDetailTopup.isEmpty()){
             return Response.build(Response.notFound("transaction detail topup"), null, null, HttpStatus.BAD_REQUEST);
         }
-        log.info(String.valueOf(transactionDetailTopup.get().getJsonNotification()));
+//        log.info(String.valueOf(transactionDetailTopup.get().getJsonNotification()));
         transactionDetailTopup.get().setJsonNotification(stringNotificationDto);
         transactionDetailTopupRepository.save(transactionDetailTopup.get());
 
@@ -454,6 +575,7 @@ public class TransactionDetailService {
             transactionDetailRepository.save(transactionDetail.get());
         }
 
+        // update user balance and coin
         if(transactionDetail.get().getStatus().equals(ETransactionDBStatus.SUCCESS.value)){
             Optional<TopupProduct> productTopup = topupProductRepository.findById(transactionDetail.get().getProductId());
             Optional<Balance> balance = balanceRepository.findByUserId(transactionDetail.get().getUser().getId());
@@ -484,8 +606,11 @@ public class TransactionDetailService {
                 log.info("User coin : {}", coin.get().getAmount());
             }
         }
-
         log.info("Transaction status : {}", transactionDetail.get().getStatus());
+
+        //update transaction history
+        Optional<TransactionHistory> transactionHistory = transactionHistoryRepository.findByOrderId(transactionDetail.get().getOrderId());
+        transactionHistory.get().setStatus(transactionDetail.get().getStatus());
 
         return Response.build(Response.update("transaction detail"), null, null, HttpStatus.OK);
     }
