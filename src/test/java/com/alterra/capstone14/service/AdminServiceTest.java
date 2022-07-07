@@ -6,6 +6,7 @@ import com.alterra.capstone14.domain.dao.Coin;
 import com.alterra.capstone14.domain.dao.User;
 import com.alterra.capstone14.domain.dto.UserUpdateDto;
 import com.alterra.capstone14.domain.dto.UserWithBalanceDto;
+import com.alterra.capstone14.domain.dto.UserWithPageDto;
 import com.alterra.capstone14.repository.BalanceRepository;
 import com.alterra.capstone14.repository.CoinRepository;
 import com.alterra.capstone14.repository.RoleRepository;
@@ -13,18 +14,25 @@ import com.alterra.capstone14.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -45,6 +53,92 @@ public class AdminServiceTest {
 
     @Autowired
     AdminService adminService;
+
+    @Test
+    void getAllUserSuccess_Test(){
+
+        User user = User.builder()
+                .id(1L)
+                .name("Hamidb")
+                .email("hamid@gmail.com")
+                .password("password")
+                .phone("081999888990")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        Balance balance = Balance.builder().id(1L).user(user).amount(140000L).build();
+        Coin coin = Coin.builder().id(1L).user(user).amount(9000L).build();
+
+        user.setCoin(coin);
+        user.setBalance(balance);
+
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<User> users = new PageImpl<>(List.of(user), pageable, 1);
+
+        when(userRepository.findAll(pageable)).thenReturn(users);
+        when(balanceRepository.existsByUserId(anyLong())).thenReturn(Boolean.TRUE);
+        when(coinRepository.existsByUserId(anyLong())).thenReturn(Boolean.TRUE);
+
+        ResponseEntity<Object> response = adminService.getAllUser(1, 10);
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+        UserWithPageDto data = (UserWithPageDto) Objects.requireNonNull(apiResponse).getData();
+
+        assertEquals("Get user data success", apiResponse.getMessage());
+        assertEquals("200", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNotNull(apiResponse.getData());
+        assertNotNull(data.getPage());
+        assertNotNull(data.getPageAvailable());
+        assertNotNull(data.getUsers());
+    }
+
+    @Test
+    void getAllUserNoBalanceSuccess_Test(){
+
+        User user = User.builder()
+                .id(1L)
+                .name("Hamidb")
+                .email("hamid@gmail.com")
+                .password("password")
+                .phone("081999888990")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        Balance balance = Balance.builder().id(1L).user(user).amount(140000L).build();
+        Coin coin = Coin.builder().id(1L).user(user).amount(9000L).build();
+
+        user.setCoin(coin);
+        user.setBalance(balance);
+
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<User> users = new PageImpl<>(List.of(user), pageable, 1);
+
+        when(userRepository.findAll(pageable)).thenReturn(users);
+        when(balanceRepository.existsByUserId(anyLong())).thenReturn(Boolean.TRUE);
+        when(coinRepository.existsByUserId(anyLong())).thenReturn(Boolean.TRUE);
+
+        ResponseEntity<Object> response = adminService.getAllUser(1, 10);
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+        UserWithPageDto data = (UserWithPageDto) Objects.requireNonNull(apiResponse).getData();
+
+        assertEquals("Get user data success", apiResponse.getMessage());
+        assertEquals("200", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNotNull(apiResponse.getData());
+        assertNotNull(data.getPage());
+        assertNotNull(data.getPageAvailable());
+        assertNotNull(data.getUsers());
+    }
 
     @Test
     void updateUserSuccess_Test() {

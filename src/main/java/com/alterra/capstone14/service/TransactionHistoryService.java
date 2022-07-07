@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +49,7 @@ public class TransactionHistoryService {
 
         List<TransactionHistory> transactionHistories = transactionHistoryRepository.findByUserIdSorted(user.get().getId());
         List<TransactionHistoryDto<Object>> transactionHistoryDtos = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy . HH:mm");
 
         transactionHistories.forEach(transactionHistory -> {
             TransactionHistoryDto<Object> transactionHistoryDto = TransactionHistoryDto.builder()
@@ -63,7 +65,10 @@ public class TransactionHistoryService {
                     .paymentType(transactionHistory.getPaymentType())
                     .transferMethod(transactionHistory.getTransferMethod())
                     .createdAt(transactionHistory.getCreatedAt())
+                    .dateString(transactionHistory.getCreatedAt().format(formatter))
                     .build();
+
+            log.info(transactionHistory.getCreatedAt().format(formatter));
 
             if(transactionHistory.getProductType().equals(EProductType.TOPUP.value)){
                 Optional<TransactionHistoryTopup> transactionHistoryTopup = transactionHistoryTopupRepository.findById(transactionHistory.getProductHistoryId());
@@ -101,6 +106,6 @@ public class TransactionHistoryService {
             transactionHistoryDtos.add(transactionHistoryDto);
         });
 
-        return Response.build(Response.get("transaction history"), transactionHistoryDtos, null, HttpStatus.CREATED);
+        return Response.build(Response.get("transaction history"), transactionHistoryDtos, null, HttpStatus.OK);
     }
 }

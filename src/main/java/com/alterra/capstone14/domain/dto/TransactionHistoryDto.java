@@ -48,6 +48,9 @@ public class TransactionHistoryDto <T>{
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
+    @JsonProperty("date_string")
+    private String dateString;
+
     @JsonProperty("product")
     private T product;
 }

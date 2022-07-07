@@ -31,7 +31,7 @@ public class QuotaProductService {
     public ResponseEntity<Object> addQuotaProduct(QuotaProductDto quotaProductDto) {
         Optional<Provider> provider = providerRepository.findById(quotaProductDto.getProviderId());
         if(provider.isEmpty()){
-            return Response.build(Response.notFound("provider"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Provider"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         QuotaProduct quotaProduct = modelMapper.map(quotaProductDto, QuotaProduct.class);
@@ -39,8 +39,15 @@ public class QuotaProductService {
 
         quotaProductRepository.save(quotaProduct);
 
-        QuotaProductDto quotaProductDto1 = modelMapper.map(quotaProduct, QuotaProductDto.class);
-        quotaProductDto1.setProvider(null);
+        QuotaProductDto quotaProductDto1 = QuotaProductDto.builder()
+                .id(quotaProduct.getId())
+                .name(quotaProduct.getName())
+                .description(quotaProduct.getDescription())
+                .grossAmount(quotaProduct.getGrossAmount())
+                .providerId(quotaProduct.getProvider().getId())
+                .providerName(quotaProduct.getProvider().getName())
+                .stock(quotaProduct.getStock())
+                .build();
 
         return Response.build(Response.add("quota product"), quotaProductDto1, null, HttpStatus.CREATED);
     }
@@ -67,10 +74,13 @@ public class QuotaProductService {
     public ResponseEntity<Object> updateQuotaProduct(QuotaProductDto quotaProductDto, Long id) {
         Optional<Provider> provider = providerRepository.findById(quotaProductDto.getProviderId());
         if(provider.isEmpty()){
-            return Response.build(Response.notFound("provider"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Provider"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<QuotaProduct> quotaProduct = quotaProductRepository.findById(id);
+        if(quotaProduct.isEmpty()){
+            return Response.build(Response.notFound("Quota product"), null, null, HttpStatus.BAD_REQUEST);
+        }
 
         quotaProduct.get().setName(quotaProductDto.getName());
         quotaProduct.get().setDescription(quotaProductDto.getDescription());
@@ -80,8 +90,15 @@ public class QuotaProductService {
 
         quotaProductRepository.save(quotaProduct.get());
 
-        QuotaProductDto quotaProductDto1 = modelMapper.map(quotaProduct, QuotaProductDto.class);
-        quotaProductDto1.setProvider(null);
+        QuotaProductDto quotaProductDto1 = QuotaProductDto.builder()
+                .id(quotaProduct.get().getId())
+                .name(quotaProduct.get().getName())
+                .description(quotaProduct.get().getDescription())
+                .grossAmount(quotaProduct.get().getGrossAmount())
+                .providerId(quotaProduct.get().getProvider().getId())
+                .providerName(quotaProduct.get().getProvider().getName())
+                .stock(quotaProduct.get().getStock())
+                .build();
 
         return Response.build(Response.update("quota product"), quotaProductDto1, null, HttpStatus.CREATED);
     }
@@ -89,7 +106,7 @@ public class QuotaProductService {
     public ResponseEntity<Object> deleteQuotaProduct(Long id) {
         Optional<QuotaProduct> quotaProduct = quotaProductRepository.findById(id);
         if(quotaProduct.isEmpty()){
-            return Response.build(Response.notFound("quota product"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Quota product"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         quotaProductRepository.deleteById(id);
