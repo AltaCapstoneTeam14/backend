@@ -103,7 +103,4 @@ public class TransactionHistoryService {
 
         return Response.build(Response.get("transaction history"), transactionHistoryDtos, null, HttpStatus.CREATED);
     }
-
-
-
 }

@@ -85,14 +85,14 @@ public class UserService {
 
         if(!user.get().getPhone().equals(userDto.getPhone())){
             if (Boolean.TRUE.equals(userRepository.existsByPhone(userDto.getPhone()))) {
-                return Response.build(Response.exist("user", "phone", userDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
+                return Response.build(Response.exist("User", "phone", userDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
             }
             user.get().setPhone(userDto.getPhone());
         }
 
         if(!user.get().getEmail().equals(userDto.getEmail())){
             if (Boolean.TRUE.equals(userRepository.existsByEmail(userDto.getEmail()))) {
-                return Response.build(Response.exist("user", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
+                return Response.build(Response.exist("User", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
             }
             user.get().setEmail(userDto.getEmail());
         }

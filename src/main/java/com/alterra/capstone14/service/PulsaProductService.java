@@ -30,7 +30,7 @@ public class PulsaProductService {
     public ResponseEntity<Object> addPulsaProduct(PulsaProductDto pulsaProductDto) {
         Optional<Provider> provider = providerRepository.findById(pulsaProductDto.getProviderId());
         if(provider.isEmpty()){
-            return Response.build(Response.notFound("provider"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Provider"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         PulsaProduct pulsaProduct = modelMapper.map(pulsaProductDto, PulsaProduct.class);
@@ -38,8 +38,15 @@ public class PulsaProductService {
 
         pulsaProductRepository.save(pulsaProduct);
 
-        PulsaProductDto pulsaProductDto1 = modelMapper.map(pulsaProduct, PulsaProductDto.class);
-        pulsaProductDto1.setProvider(null);
+        PulsaProductDto pulsaProductDto1 = PulsaProductDto.builder()
+                .id(pulsaProduct.getId())
+                .name(pulsaProduct.getName())
+                .denom(pulsaProduct.getDenom())
+                .grossAmount(pulsaProduct.getGrossAmount())
+                .providerId(pulsaProduct.getProvider().getId())
+                .providerName(pulsaProduct.getProvider().getName())
+                .stock(pulsaProduct.getStock())
+                .build();
 
         return Response.build(Response.add("pulsa product"), pulsaProductDto1, null, HttpStatus.CREATED);
     }
@@ -66,10 +73,13 @@ public class PulsaProductService {
     public ResponseEntity<Object> updatePulsaProduct(PulsaProductDto pulsaProductDto, Long id) {
         Optional<Provider> provider = providerRepository.findById(pulsaProductDto.getProviderId());
         if(provider.isEmpty()){
-            return Response.build(Response.notFound("provider"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Provider"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<PulsaProduct> pulsaProduct = pulsaProductRepository.findById(id);
+        if(pulsaProduct.isEmpty()){
+            return Response.build(Response.notFound("Pulsa product"), null, null, HttpStatus.BAD_REQUEST);
+        }
 
         pulsaProduct.get().setName(pulsaProductDto.getName());
         pulsaProduct.get().setDenom(pulsaProductDto.getDenom());
@@ -79,8 +89,15 @@ public class PulsaProductService {
 
         pulsaProductRepository.save(pulsaProduct.get());
 
-        PulsaProductDto pulsaProductDto1 = modelMapper.map(pulsaProduct, PulsaProductDto.class);
-        pulsaProductDto1.setProvider(null);
+        PulsaProductDto pulsaProductDto1 = PulsaProductDto.builder()
+                .id(pulsaProduct.get().getId())
+                .name(pulsaProduct.get().getName())
+                .denom(pulsaProduct.get().getDenom())
+                .grossAmount(pulsaProduct.get().getGrossAmount())
+                .providerId(pulsaProduct.get().getProvider().getId())
+                .providerName(pulsaProduct.get().getProvider().getName())
+                .stock(pulsaProduct.get().getStock())
+                .build();
 
         return Response.build(Response.update("pulsa product"), pulsaProductDto1, null, HttpStatus.CREATED);
     }
@@ -88,7 +105,7 @@ public class PulsaProductService {
     public ResponseEntity<Object> deletePulsaProduct(Long id) {
         Optional<PulsaProduct> pulsaProduct = pulsaProductRepository.findById(id);
         if(pulsaProduct.isEmpty()){
-            return Response.build(Response.notFound("pulsa product"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Pulsa product"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         pulsaProductRepository.deleteById(id);

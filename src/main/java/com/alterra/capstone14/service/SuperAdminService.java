@@ -34,7 +34,7 @@ public class SuperAdminService {
     public ResponseEntity<Object> addAdminRole(EmailDto emailDto) {
         Optional<User> user = userRepository.findByEmail(emailDto.getEmail());
         if(user.isEmpty()){
-            return Response.build(Response.notFound("user"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("User"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<Role> adminRole = roleRepository.findByName(ERole.ADMIN);

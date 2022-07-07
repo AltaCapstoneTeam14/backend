@@ -53,6 +53,9 @@ public class CashoutProductService {
 
     public ResponseEntity<Object> updateCashoutProduct(CashoutProductDto cashoutProductDto, Long id) {
         Optional<CashoutProduct> cashoutProduct = cashoutProductRepository.findById(id);
+        if(cashoutProduct.isEmpty()){
+            return Response.build(Response.notFound("Cashout product"), null, null, HttpStatus.BAD_REQUEST);
+        }
 
         cashoutProduct.get().setName(cashoutProductDto.getName());
         cashoutProduct.get().setCoinAmount(cashoutProductDto.getCoinAmount());
@@ -60,7 +63,12 @@ public class CashoutProductService {
 
         cashoutProductRepository.save(cashoutProduct.get());
 
-        CashoutProductDto cashoutProductDto1 = modelMapper.map(cashoutProduct, CashoutProductDto.class);
+        CashoutProductDto cashoutProductDto1 = CashoutProductDto.builder()
+                .id(cashoutProduct.get().getId())
+                .name(cashoutProduct.get().getName())
+                .balanceAmount(cashoutProduct.get().getBalanceAmount())
+                .coinAmount(cashoutProduct.get().getCoinAmount())
+                .build();
 
         return Response.build(Response.update("cashout product"), cashoutProductDto1, null, HttpStatus.CREATED);
     }
@@ -68,7 +76,7 @@ public class CashoutProductService {
     public ResponseEntity<Object> deleteCashoutProduct(Long id) {
         Optional<CashoutProduct> cashoutProduct = cashoutProductRepository.findById(id);
         if(cashoutProduct.isEmpty()){
-            return Response.build(Response.notFound("cashout product"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Cashout product"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         cashoutProductRepository.deleteById(id);

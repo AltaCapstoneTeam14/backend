@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotNull;
 public class CashoutProductDto {
     private Long id;
 
+    @NotBlank(message = "name is required!")
     private String name;
 
     @NotNull(message = "coin_amount is required!")

@@ -58,7 +58,7 @@ public class TopupProductService {
     public ResponseEntity<Object> updateTopupProduct(TopupProductDto topupProductDto, Long id) {
         Optional<TopupProduct> topupProduct = topupProductRepository.findById(id);
         if(topupProduct.isEmpty()){
-            return Response.build(Response.notFound("topup product"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Topup product"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         topupProduct.get().setName(topupProductDto.getName());
@@ -74,7 +74,7 @@ public class TopupProductService {
     public ResponseEntity<Object> deleteTopupProduct(Long id) {
         Optional<TopupProduct> topupProduct = topupProductRepository.findById(id);
         if(topupProduct.isEmpty()){
-            return Response.build(Response.notFound("topup product"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Topup product"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         topupProductRepository.delete(topupProduct.get());

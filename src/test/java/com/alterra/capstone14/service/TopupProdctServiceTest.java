@@ -1,7 +1,11 @@
 package com.alterra.capstone14.service;
 
 import com.alterra.capstone14.domain.common.ApiResponse;
+import com.alterra.capstone14.domain.dao.Provider;
+import com.alterra.capstone14.domain.dao.PulsaProduct;
 import com.alterra.capstone14.domain.dao.TopupProduct;
+import com.alterra.capstone14.domain.dto.ProviderDto;
+import com.alterra.capstone14.domain.dto.PulsaProductDto;
 import com.alterra.capstone14.domain.dto.TopupProductDto;
 import com.alterra.capstone14.repository.TopupProductRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +44,14 @@ public class TopupProdctServiceTest {
     void addTopupProductSuccess_Test(){
         TopupProduct topupProduct = TopupProduct.builder()
                 .id(1L)
+                .name("Topup 100K")
                 .amount(100000L)
                 .grossAmount(101000L)
                 .build();
 
         TopupProductDto topupProductDto = TopupProductDto.builder()
                 .id(1L)
+                .name("Topup 100K")
                 .amount(100000L)
                 .grossAmount(101000L)
                 .build();
@@ -66,6 +72,7 @@ public class TopupProdctServiceTest {
         assertNull(apiResponse.getErrors());
         assertNotNull(apiResponse.getData());
         assertEquals(1L, data.getId());
+        assertEquals("Topup 100K", data.getName());
         assertEquals(100000L, data.getAmount());
         assertEquals(101000L, data.getGrossAmount());
     }
@@ -74,6 +81,7 @@ public class TopupProdctServiceTest {
     void getTopupProductsSuccess_Test(){
         TopupProduct topupProduct = TopupProduct.builder()
                 .id(1L)
+                .name("Topup 100K")
                 .amount(100000L)
                 .grossAmount(101000L)
                 .build();
@@ -93,6 +101,69 @@ public class TopupProdctServiceTest {
         assertEquals("200", apiResponse.getCode());
         assertNotNull(apiResponse.getTimestamp());
         assertNull(apiResponse.getErrors());
+        assertEquals(1, data.size());
+    }
+
+    @Test
+    void updatePulsaProductSuccess_Test(){
+        TopupProduct topupProduct = TopupProduct.builder()
+                .id(1L)
+                .name("Topup 100K")
+                .amount(100000L)
+                .grossAmount(101000L)
+                .build();
+
+        TopupProductDto topupProductDto = TopupProductDto.builder()
+                .id(1L)
+                .name("Topup 150K")
+                .amount(150000L)
+                .grossAmount(151000L)
+                .build();
+
+        when(topupProductRepository.findById(any())).thenReturn(Optional.ofNullable(topupProduct));
+        when(topupProductRepository.save(any())).thenReturn(topupProduct);
+        when(modelMapper.map(any(), eq(TopupProductDto.class))).thenReturn(topupProductDto);
+
+        ResponseEntity<Object> response = topupProductService.updateTopupProduct(
+                TopupProductDto.builder()
+                        .name("Topup 150K")
+                        .amount(150000L)
+                        .grossAmount(151000L)
+                        .build()
+                , 1L);
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+        TopupProductDto data = (TopupProductDto) Objects.requireNonNull(apiResponse).getData();
+
+        assertEquals("Update topup product success", apiResponse.getMessage());
+        assertEquals("201", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNotNull(apiResponse.getData());
+        assertEquals(1L, data.getId());
+        assertEquals("Topup 150K", data.getName());
+        assertEquals(150000L, data.getAmount());
+        assertEquals(151000L, data.getGrossAmount());
+    }
+
+    @Test
+    void updateTopupProductNotFound_Test(){
+        when(topupProductRepository.findById(any())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> response = topupProductService.updateTopupProduct(
+                TopupProductDto.builder()
+                        .name("Topup 150K")
+                        .amount(150000L)
+                        .grossAmount(151000L)
+                        .build(),1L);
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+
+        assertEquals("Topup product not found", apiResponse.getMessage());
+        assertEquals("400", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNull(apiResponse.getData());
     }
 
     @Test
@@ -111,6 +182,21 @@ public class TopupProdctServiceTest {
 
         assertEquals("Delete topup product success", apiResponse.getMessage());
         assertEquals("201", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNull(apiResponse.getData());
+    }
+
+    @Test
+    void deleteTopupProductNotFound_Test(){
+        when(topupProductRepository.findById(any())).thenReturn(Optional.empty());
+
+        ResponseEntity<Object> response = topupProductService.deleteTopupProduct(1L);
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+
+        assertEquals("Topup product not found", apiResponse.getMessage());
+        assertEquals("400", apiResponse.getCode());
         assertNotNull(apiResponse.getTimestamp());
         assertNull(apiResponse.getErrors());
         assertNull(apiResponse.getData());

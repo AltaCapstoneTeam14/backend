@@ -37,7 +37,7 @@ public class PulsaProductDto {
     @Min(value = 1, message = "stock is at least 1")
     private Long stock;
 
-    private Provider provider;
+    private ProviderDto provider;
 
     @JsonProperty("provider_name")
     private String providerName;
