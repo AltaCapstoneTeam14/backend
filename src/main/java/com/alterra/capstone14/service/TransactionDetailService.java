@@ -610,7 +610,9 @@ public class TransactionDetailService {
 
         //update transaction history
         Optional<TransactionHistory> transactionHistory = transactionHistoryRepository.findByOrderId(transactionDetail.get().getOrderId());
-        transactionHistory.get().setStatus(transactionDetail.get().getStatus());
+        transactionHistory.ifPresent(transactionHistory1 -> {
+            transactionHistory1.setStatus(transactionDetail.get().getStatus());
+        });
 
         return Response.build(Response.update("transaction detail"), null, null, HttpStatus.OK);
     }

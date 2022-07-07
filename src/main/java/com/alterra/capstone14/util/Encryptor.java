@@ -5,8 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class Encryptor {
-    public static String encryptStringToSHA512(String input)
-    {
+    public static String encryptStringToSHA512(String input) {
         try {
             // getInstance() method is called with algorithm SHA-512
             MessageDigest md = MessageDigest.getInstance("SHA-512");
@@ -23,7 +22,7 @@ public class Encryptor {
             String hashtext = no.toString(16);
 
             // Add preceding 0s to make it 32 bit
-            while (hashtext.length() < 32) {
+            while (hashtext.length() < 128) {
                 hashtext = "0" + hashtext;
             }
 
