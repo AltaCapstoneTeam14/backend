@@ -55,11 +55,11 @@ public class AuthService {
 
     public ResponseEntity<Object> registerUser(UserDto userDto) {
         if (Boolean.TRUE.equals(userRepository.existsByEmail(userDto.getEmail()))) {
-            return Response.build(Response.exist("user", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.exist("User", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
         }
 
         if (Boolean.TRUE.equals(userRepository.existsByPhone(userDto.getPhone()))) {
-            return Response.build(Response.exist("user", "phone", userDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.exist("User", "phone", userDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
         }
 
         User user = modelMapper.map(userDto, User.class);
@@ -96,13 +96,13 @@ public class AuthService {
 
     public ResponseEntity<Object> loginUser(LoginDto loginDto) {
         if (Boolean.FALSE.equals(userRepository.existsByEmail(loginDto.getEmail()))) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<User> user = userRepository.findByEmail(loginDto.getEmail());
         Boolean isPasswordCorrect = encoder.matches(loginDto.getPassword(), user.get().getPassword());
         if (Boolean.FALSE.equals(isPasswordCorrect)) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -119,7 +119,7 @@ public class AuthService {
 
     public ResponseEntity<Object> loginAdmin(LoginDto loginDto) {
         if (Boolean.FALSE.equals(userRepository.existsByEmail(loginDto.getEmail()))) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<User> user = userRepository.findByEmail(loginDto.getEmail());
@@ -130,12 +130,12 @@ public class AuthService {
         }
 
         if(!user.get().getRoles().contains(adminRole.get())){
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Boolean isPasswordCorrect = encoder.matches(loginDto.getPassword(), user.get().getPassword());
         if (Boolean.FALSE.equals(isPasswordCorrect)) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -152,7 +152,7 @@ public class AuthService {
 
     public ResponseEntity<Object> loginSuperAdmin(LoginDto loginDto) {
         if (Boolean.FALSE.equals(userRepository.existsByEmail(loginDto.getEmail()))) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<User> user = userRepository.findByEmail(loginDto.getEmail());
@@ -164,12 +164,12 @@ public class AuthService {
 
         if(!user.get().getRoles().contains(superAdminRole.get())){
             log.info("user don't have super admin role");
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Boolean isPasswordCorrect = encoder.matches(loginDto.getPassword(), user.get().getPassword());
         if (Boolean.FALSE.equals(isPasswordCorrect)) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Authentication authentication = authenticationManager.authenticate(

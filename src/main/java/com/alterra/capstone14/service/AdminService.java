@@ -85,7 +85,7 @@ public class AdminService {
     public ResponseEntity<Object> updateUser(UserUpdateDto userUpdateDto, Long id) {
         Optional<User> user = userRepository.findById(id);
         if(user.isEmpty()){
-            return Response.build(Response.notFound("user"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("User"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         user.get().setName(userUpdateDto.getName());
@@ -94,7 +94,7 @@ public class AdminService {
 
         if(!user.get().getPhone().equals(userUpdateDto.getPhone())){
             if (Boolean.TRUE.equals(userRepository.existsByPhone(userUpdateDto.getPhone()))) {
-                return Response.build(Response.exist("user", "phone", userUpdateDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
+                return Response.build(Response.exist("User", "phone", userUpdateDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
             }
             user.get().setPhone(userUpdateDto.getPhone());
         }

@@ -33,7 +33,7 @@ public class ProviderService {
 
         ProviderDto providerDto1 = modelMapper.map(provider, ProviderDto.class);
 
-        return Response.build(Response.add("provider"), provider, null, HttpStatus.CREATED);
+        return Response.build(Response.add("provider"), providerDto1, null, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> getProviders() {
@@ -50,7 +50,7 @@ public class ProviderService {
     public ResponseEntity<Object> deleteProvider(Long id) {
         Optional<Provider> provider = providerRepository.findById(id);
         if(provider.isEmpty()){
-            return Response.build(Response.notFound("provider"), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.notFound("Provider"), null, null, HttpStatus.BAD_REQUEST);
         }
 
         providerRepository.deleteById(id);
