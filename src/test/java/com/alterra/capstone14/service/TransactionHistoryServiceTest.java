@@ -109,7 +109,7 @@ public class TransactionHistoryServiceTest {
         List<TransactionHistoryDto> data = (List<TransactionHistoryDto>) Objects.requireNonNull(apiResponse).getData();
 
         assertEquals("Get transaction history success", apiResponse.getMessage());
-        assertEquals("201", apiResponse.getCode());
+        assertEquals("200", apiResponse.getCode());
         assertNotNull(apiResponse.getTimestamp());
         assertNull(apiResponse.getErrors());
         assertNotNull(apiResponse.getData());
@@ -180,7 +180,7 @@ public class TransactionHistoryServiceTest {
         List<TransactionHistoryDto> data = (List<TransactionHistoryDto>) Objects.requireNonNull(apiResponse).getData();
 
         assertEquals("Get transaction history success", apiResponse.getMessage());
-        assertEquals("201", apiResponse.getCode());
+        assertEquals("200", apiResponse.getCode());
         assertNotNull(apiResponse.getTimestamp());
         assertNull(apiResponse.getErrors());
         assertNotNull(apiResponse.getData());
@@ -253,7 +253,7 @@ public class TransactionHistoryServiceTest {
         List<TransactionHistoryDto> data = (List<TransactionHistoryDto>) Objects.requireNonNull(apiResponse).getData();
 
         assertEquals("Get transaction history success", apiResponse.getMessage());
-        assertEquals("201", apiResponse.getCode());
+        assertEquals("200", apiResponse.getCode());
         assertNotNull(apiResponse.getTimestamp());
         assertNull(apiResponse.getErrors());
         assertNotNull(apiResponse.getData());
@@ -324,7 +324,7 @@ public class TransactionHistoryServiceTest {
         List<TransactionHistoryDto> data = (List<TransactionHistoryDto>) Objects.requireNonNull(apiResponse).getData();
 
         assertEquals("Get transaction history success", apiResponse.getMessage());
-        assertEquals("201", apiResponse.getCode());
+        assertEquals("200", apiResponse.getCode());
         assertNotNull(apiResponse.getTimestamp());
         assertNull(apiResponse.getErrors());
         assertNotNull(apiResponse.getData());
