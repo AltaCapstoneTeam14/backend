@@ -1,6 +1,6 @@
 package com.alterra.capstone14.service;
 
-import com.alterra.capstone14.constant.ERole;
+import com.alterra.capstone14.constant.*;
 import com.alterra.capstone14.domain.common.ApiResponse;
 import com.alterra.capstone14.domain.dao.*;
 import com.alterra.capstone14.domain.dao.TransactionHistory;
@@ -9,7 +9,6 @@ import com.alterra.capstone14.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -58,7 +57,7 @@ public class TransactionHistoryServiceTest {
     private TransactionHistoryService transactionHistoryService;
 
     @Test
-    void getTransactionHistory_Test() {
+    public void getTransactionHistory_PulsaTest() {
         Role userRole = Role.builder().id(1L).name(ERole.USER).build();
 
         Set<Role> roles = new HashSet<>();
@@ -79,14 +78,20 @@ public class TransactionHistoryServiceTest {
                 .userId(1L)
                 .orderId("1")
                 .transactionDetailId(1L)
-                .productType("PULSA")
+                .productType(EProductType.PULSA.value)
                 .productHistoryId(1L)
                 .name("Pulsa 5K")
                 .grossAmount(6000L)
-                .status("pending")
-                .paymentType("gopay")
-                .transferMethod("gopay")
+                .status(EPulsaQuotaStatus.SUCCESS.value)
+                .paymentType(EPaymentType.GOPAY.value)
+                .transferMethod("")
                 .createdAt(LocalDateTime.now())
+                .build();
+
+        TransactionHistoryPulsa transactionHistoryPulsa = TransactionHistoryPulsa.builder()
+                .provider("Tri")
+                .denom(10000L)
+                .phone("089504215913")
                 .build();
 
         CustomUserDetails userDetails = CustomUserDetails.build(user);
@@ -96,6 +101,7 @@ public class TransactionHistoryServiceTest {
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
         when(transactionHistoryRepository.findByUserIdSorted(any())).thenReturn((List.of(transactionHistories)));
+        when(transactionHistoryPulsaRepository.findById(any())).thenReturn(Optional.of(transactionHistoryPulsa));
 
         ResponseEntity<Object> response = transactionHistoryService.getTransactionHistory();
 
@@ -112,13 +118,228 @@ public class TransactionHistoryServiceTest {
             assertEquals(1L, dataHistory.getUserId());
             assertEquals("1", dataHistory.getOrderId());
             assertEquals(1L, dataHistory.getTransactionDetailId());
-            assertEquals("PULSA", dataHistory.getProductType());
+            assertEquals("pulsa", dataHistory.getProductType());
             assertEquals(1L, dataHistory.getProductHistoryId());
             assertEquals("Pulsa 5K", dataHistory.getName());
             assertEquals(6000L, dataHistory.getGrossAmount());
-            assertEquals("pending", dataHistory.getStatus());
+            assertEquals("success", dataHistory.getStatus());
             assertEquals("gopay", dataHistory.getPaymentType());
-            assertEquals("gopay", dataHistory.getTransferMethod());
+            assertEquals("", dataHistory.getTransferMethod());
+            assertNotNull(dataHistory.getCreatedAt());
+        }
+    }
+
+    @Test
+    void getTransactionHistory_TopupTest() {
+        Role userRole = Role.builder().id(1L).name(ERole.USER).build();
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+
+        User user = User.builder()
+                .id(1L)
+                .name("Satya")
+                .email("satya@gmail.com")
+                .password("password")
+                .phone("089504215913")
+                .roles(roles)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        TransactionHistory transactionHistories = TransactionHistory.builder()
+                .id(2L)
+                .userId(1L)
+                .orderId("1")
+                .transactionDetailId(1L)
+                .productType(EProductType.TOPUP.value)
+                .productHistoryId(2L)
+                .name("Topup 20K")
+                .grossAmount(21000L)
+                .status(EPulsaQuotaStatus.SUCCESS.value)
+                .paymentType(EPaymentType.BANK_TRANSFER.value)
+                .transferMethod(EBankTransfer.BNI.value)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        TransactionHistoryTopup transactionHistoryTopup = TransactionHistoryTopup.builder()
+                .amount(100000L)
+                .build();
+
+        CustomUserDetails userDetails = CustomUserDetails.build(user);
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
+        when(transactionHistoryRepository.findByUserIdSorted(any())).thenReturn((List.of(transactionHistories)));
+        when(transactionHistoryTopupRepository.findById(any())).thenReturn(Optional.of(transactionHistoryTopup));
+
+        ResponseEntity<Object> response = transactionHistoryService.getTransactionHistory();
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+        List<TransactionHistoryDto> data = (List<TransactionHistoryDto>) Objects.requireNonNull(apiResponse).getData();
+
+        assertEquals("Get transaction history success", apiResponse.getMessage());
+        assertEquals("201", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNotNull(apiResponse.getData());
+        for (TransactionHistoryDto dataHistory : data) {
+            assertEquals(2L, dataHistory.getId());
+            assertEquals(1L, dataHistory.getUserId());
+            assertEquals("1", dataHistory.getOrderId());
+            assertEquals(1L, dataHistory.getTransactionDetailId());
+            assertEquals("topup", dataHistory.getProductType());
+            assertEquals(2L, dataHistory.getProductHistoryId());
+            assertEquals("Topup 20K", dataHistory.getName());
+            assertEquals(21000L, dataHistory.getGrossAmount());
+            assertEquals("success", dataHistory.getStatus());
+            assertEquals("bank_transfer", dataHistory.getPaymentType());
+            assertEquals("bni", dataHistory.getTransferMethod());
+            assertNotNull(dataHistory.getCreatedAt());
+        }
+    }
+
+    @Test
+    void getTransactionHistory_QuotaTest() {
+        Role userRole = Role.builder().id(1L).name(ERole.USER).build();
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+
+        User user = User.builder()
+                .id(1L)
+                .name("Satya")
+                .email("satya@gmail.com")
+                .password("password")
+                .phone("089504215913")
+                .roles(roles)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        TransactionHistory transactionHistories = TransactionHistory.builder()
+                .id(3L)
+                .userId(1L)
+                .orderId("1")
+                .transactionDetailId(1L)
+                .productType(EProductType.QUOTA.value)
+                .productHistoryId(3L)
+                .name("Quota 1GB")
+                .grossAmount(10000L)
+                .status(EPulsaQuotaStatus.PENDING.value)
+                .paymentType(EPaymentType.BALANCE.value)
+                .transferMethod("")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        TransactionHistoryQuota transactionHistoryQuota = TransactionHistoryQuota.builder()
+                .provider("Telkomsel")
+                .description("Quota 1GB")
+                .phone("08950415913")
+                .build();
+
+        CustomUserDetails userDetails = CustomUserDetails.build(user);
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
+        when(transactionHistoryRepository.findByUserIdSorted(any())).thenReturn((List.of(transactionHistories)));
+        when(transactionHistoryQuotaRepository.findById(any())).thenReturn(Optional.of(transactionHistoryQuota));
+
+        ResponseEntity<Object> response = transactionHistoryService.getTransactionHistory();
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+        List<TransactionHistoryDto> data = (List<TransactionHistoryDto>) Objects.requireNonNull(apiResponse).getData();
+
+        assertEquals("Get transaction history success", apiResponse.getMessage());
+        assertEquals("201", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNotNull(apiResponse.getData());
+        for (TransactionHistoryDto dataHistory : data) {
+            assertEquals(3L, dataHistory.getId());
+            assertEquals(1L, dataHistory.getUserId());
+            assertEquals("1", dataHistory.getOrderId());
+            assertEquals(1L, dataHistory.getTransactionDetailId());
+            assertEquals("quota", dataHistory.getProductType());
+            assertEquals(3L, dataHistory.getProductHistoryId());
+            assertEquals("Quota 1GB", dataHistory.getName());
+            assertEquals(10000L, dataHistory.getGrossAmount());
+            assertEquals("pending", dataHistory.getStatus());
+            assertEquals("balance", dataHistory.getPaymentType());
+            assertEquals("", dataHistory.getTransferMethod());
+            assertNotNull(dataHistory.getCreatedAt());
+        }
+    }
+
+    @Test
+    void getTransactionHistory_CashoutTest() {
+        Role userRole = Role.builder().id(1L).name(ERole.USER).build();
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+
+        User user = User.builder()
+                .id(1L)
+                .name("Satya")
+                .email("satya@gmail.com")
+                .password("password")
+                .phone("089504215913")
+                .roles(roles)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        TransactionHistory transactionHistories = TransactionHistory.builder()
+                .id(4L)
+                .userId(1L)
+                .orderId("1")
+                .transactionDetailId(1L)
+                .productType(EProductType.CASHOUT.value)
+                .productHistoryId(4L)
+                .name("Cashout 50K")
+                .grossAmount(50000L)
+                .status(ETransactionStatus.CAPTURE.value)
+                .paymentType(EPaymentType.BALANCE.value)
+                .transferMethod("")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        TransactionHistoryCashout transactionHistoryCashout = TransactionHistoryCashout.builder()
+                .balanceAmount(100000L)
+                .build();
+
+        CustomUserDetails userDetails = CustomUserDetails.build(user);
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
+        when(transactionHistoryRepository.findByUserIdSorted(any())).thenReturn((List.of(transactionHistories)));
+        when(transactionHistoryCashoutRepository.findById(any())).thenReturn(Optional.of(transactionHistoryCashout));
+
+        ResponseEntity<Object> response = transactionHistoryService.getTransactionHistory();
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+        List<TransactionHistoryDto> data = (List<TransactionHistoryDto>) Objects.requireNonNull(apiResponse).getData();
+
+        assertEquals("Get transaction history success", apiResponse.getMessage());
+        assertEquals("201", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNotNull(apiResponse.getData());
+        for (TransactionHistoryDto dataHistory : data) {
+            assertEquals(4L, dataHistory.getId());
+            assertEquals(1L, dataHistory.getUserId());
+            assertEquals("1", dataHistory.getOrderId());
+            assertEquals(1L, dataHistory.getTransactionDetailId());
+            assertEquals("cashout", dataHistory.getProductType());
+            assertEquals(4L, dataHistory.getProductHistoryId());
+            assertEquals("Cashout 50K", dataHistory.getName());
+            assertEquals(50000L, dataHistory.getGrossAmount());
+            assertEquals("capture", dataHistory.getStatus());
+            assertEquals("balance", dataHistory.getPaymentType());
+            assertEquals("", dataHistory.getTransferMethod());
             assertNotNull(dataHistory.getCreatedAt());
         }
     }
