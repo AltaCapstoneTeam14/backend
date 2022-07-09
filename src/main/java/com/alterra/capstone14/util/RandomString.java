@@ -3,7 +3,7 @@ package com.alterra.capstone14.util;
 import java.util.Random;
 
 public class RandomString {
-    public static String generate(String prefix){
+    public String generate(String prefix){
         // create a string of uppercase and lowercase characters and numbers
         String upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         String lowerAlphabet = "abcdefghijklmnopqrstuvwxyz";

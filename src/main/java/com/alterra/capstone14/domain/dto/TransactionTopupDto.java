@@ -18,4 +18,7 @@ public class TransactionTopupDto {
     @NotBlank(message = "transfer_method is required!")
     @JsonProperty("transfer_method")
     private String transferMethod;
+
+
+
 }
