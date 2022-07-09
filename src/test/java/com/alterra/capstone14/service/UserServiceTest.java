@@ -57,7 +57,6 @@ public class UserServiceTest {
     @MockBean
     private Authentication authentication;
 
-
     @Test
     void getProfileSuccess_Test() {
         Role userRole = Role.builder().id(1L).name(ERole.USER).build();

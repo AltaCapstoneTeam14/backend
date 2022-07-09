@@ -7,10 +7,9 @@ import com.alterra.capstone14.domain.dto.WeeklyLoginDto;
 import com.alterra.capstone14.repository.CoinRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.repository.WeeklyLoginRepository;
+import com.alterra.capstone14.util.DateCurrent;
 import com.alterra.capstone14.util.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
 import java.util.Optional;
 
 @Service
@@ -33,20 +31,21 @@ public class WeeklyLoginService {
     @Autowired
     CoinRepository coinRepository;
 
+    @Autowired
+    DateCurrent dateCurrent;
+
     public ResponseEntity<Object> getStatus(){
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
         Optional<User> user = userRepository.findByEmail(email);
 
-        LocalDate now = new LocalDate();
-        LocalDate monday = now.withDayOfWeek(DateTimeConstants.MONDAY);
-        int day = now.getDayOfWeek();
+//        DateCurrentImpl dateCurrent = new DateCurrentImpl();
 
-        Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByStartDate(monday.toString());
+        Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByStartDate(dateCurrent.getMonday());
         if(weeklyLogin.isEmpty()){
             WeeklyLogin newWeeklyLogin = WeeklyLogin.builder()
                     .user(user.get())
-                    .startDate(monday.toString())
+                    .startDate(dateCurrent.getMonday())
                     .loginCount(0)
                     .lastLogin(0)
                     .build();
@@ -62,7 +61,7 @@ public class WeeklyLoginService {
                 .lastLogin(weeklyLogin.get().getLastLogin())
                 .build();
 
-        if(weeklyLogin.get().getLastLogin().equals(day)){
+        if(weeklyLogin.get().getLastLogin().equals(dateCurrent.getDay())){
             weeklyLoginDto.setStatus(EWeeklyLoginStatus.CLAIMED.value);
         }else{
             weeklyLoginDto.setStatus(EWeeklyLoginStatus.NOT_CLAIMED.value);
@@ -76,15 +75,11 @@ public class WeeklyLoginService {
         String email = userDetails.getUsername();
         Optional<User> user = userRepository.findByEmail(email);
 
-        LocalDate now = new LocalDate();
-        LocalDate monday = now.withDayOfWeek(DateTimeConstants.MONDAY);
-        int day = now.getDayOfWeek();
-
-        Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByStartDate(monday.toString());
+        Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByStartDate(dateCurrent.getMonday());
         if(weeklyLogin.isEmpty()){
             WeeklyLogin newWeeklyLogin = WeeklyLogin.builder()
                     .user(user.get())
-                    .startDate(monday.toString())
+                    .startDate(dateCurrent.getMonday())
                     .loginCount(0)
                     .lastLogin(0)
                     .build();
@@ -94,12 +89,14 @@ public class WeeklyLoginService {
         }
 
         Long coinReward = 0L;
-        if(!weeklyLogin.get().getLastLogin().equals(day)){
-            weeklyLogin.get().setLastLogin(day);
+        if(!weeklyLogin.get().getLastLogin().equals(dateCurrent.getDay())){
+            weeklyLogin.get().setLastLogin(dateCurrent.getDay());
             weeklyLogin.get().setLoginCount(weeklyLogin.get().getLoginCount()+1);
             weeklyLoginRepository.save(weeklyLogin.get());
 
-            if(day == 7){
+            log.info(String.valueOf(dateCurrent.getDay()));
+            log.info(String.valueOf(weeklyLogin.get().getLoginCount()));
+            if(dateCurrent.getDay() == 7 && weeklyLogin.get().getLoginCount() == 7){
                 coinReward = 500L;
             }else{
                 coinReward = 100L;

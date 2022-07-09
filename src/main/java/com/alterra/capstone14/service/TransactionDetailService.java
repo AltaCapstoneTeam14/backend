@@ -84,7 +84,14 @@ public class TransactionDetailService {
     @Autowired
     TransactionHistoryQuotaRepository transactionHistoryQuotaRepository;
 
-    WebClient webClient = WebClient.create();
+    @Autowired
+    RandomString randomString;
+
+    @Autowired
+    WebClient webClient;
+
+    @Autowired
+    Encryptor encryptor;
 
     @Value("${midtrans.baseurl}")
     private String midtransBaseUrl;
@@ -110,7 +117,8 @@ public class TransactionDetailService {
         }
 
         // create topup detail and add to db
-        String orderId = RandomString.generate(orderIdPrefix);
+        String orderId = randomString.generate(orderIdPrefix);
+        log.info(orderId);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.GOPAY.value)
                 .transferMethod(EPaymentType.GOPAY.value)
@@ -144,7 +152,7 @@ public class TransactionDetailService {
 
         log.info("response web client : {}", response);
 
-        GopayChargeRes gopayChargeRes = new ObjectMapper().readValue(response, GopayChargeRes.class);
+        GopayChargeRes gopayChargeRes = objectMapper.readValue(response, GopayChargeRes.class);
         if(gopayChargeRes.getStatusCode().equals(String.valueOf(HttpStatus.CREATED.value()))){
             transactionDetail.setStatus(gopayChargeRes.getTransactionStatus());
             transactionDetailRepository.save(transactionDetail);
@@ -161,6 +169,8 @@ public class TransactionDetailService {
                 .actions(gopayChargeRes.getActions())
                 .status(transactionDetail.getStatus())
                 .build();
+
+
 
 
         //create transaction history
@@ -200,7 +210,8 @@ public class TransactionDetailService {
 
         // create topup detail and add to db
         // bank_transfer either bca, bni / bri
-        String orderId = RandomString.generate(orderIdPrefix);
+        String orderId = randomString.generate(orderIdPrefix);
+        log.info(orderId);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.BANK_TRANSFER.value)
                 .user(user.get())
@@ -241,7 +252,7 @@ public class TransactionDetailService {
 
         log.info("response : {}", response);
 
-        BankChargeRes bankChargeRes = new ObjectMapper().readValue(response, BankChargeRes.class);
+        BankChargeRes bankChargeRes = objectMapper.readValue(response, BankChargeRes.class);
         if(bankChargeRes.getStatusCode().equals(String.valueOf(HttpStatus.CREATED.value()))){
             transactionDetail.setStatus(bankChargeRes.getTransactionStatus());
             transactionDetailRepository.save(transactionDetail);
@@ -312,19 +323,18 @@ public class TransactionDetailService {
         pulsaProduct.get().setStock(pulsaProduct.get().getStock()-1);
         pulsaProductRepository.save(pulsaProduct.get());
 
-        String orderId = RandomString.generate(orderIdPrefix);
-        TransactionDetail transactionDetail = TransactionDetail.builder()
-                .paymentType(EPaymentType.BALANCE.value)
-                .transferMethod(EPaymentType.BALANCE.value)
-                .user(user.get())
-                .productType(EProductType.PULSA.value)
-                .productId(buyPulsaDto.getProductId())
-                .orderId(orderId)
-                .grossAmount(pulsaProduct.get().getGrossAmount())
-                .status(ETransactionDBStatus.SUCCESS.value)
-                .build();
-
-        transactionDetailRepository.save(transactionDetail);
+        String orderId = randomString.generate(orderIdPrefix);
+        TransactionDetail transactionDetail = transactionDetailRepository.save(TransactionDetail.builder()
+                        .paymentType(EPaymentType.BALANCE.value)
+                        .transferMethod(EPaymentType.BALANCE.value)
+                        .user(user.get())
+                        .productType(EProductType.PULSA.value)
+                        .productId(buyPulsaDto.getProductId())
+                        .orderId(orderId)
+                        .grossAmount(pulsaProduct.get().getGrossAmount())
+                        .status(ETransactionDBStatus.SUCCESS.value)
+                        .build());
+//        transactionDetailRepository.save(transactionDetail);
 
         TransactionDetailPulsa transactionDetailPulsa = TransactionDetailPulsa.builder()
                 .phone(buyPulsaDto.getPhone())
@@ -332,6 +342,7 @@ public class TransactionDetailService {
                 .build();
         transactionDetailPulsaRepository.save(transactionDetailPulsa);
 
+        log.info(transactionDetail.getCreatedAt().toString());
         TransactionDetailWithCoinDto transactionDetailDto = TransactionDetailWithCoinDto.builder()
                 .id(transactionDetail.getId())
                 .orderId(transactionDetail.getOrderId())
@@ -396,8 +407,8 @@ public class TransactionDetailService {
         quotaProduct.get().setStock(quotaProduct.get().getStock()-1);
         quotaProductRepository.save(quotaProduct.get());
 
-        String orderId = RandomString.generate(orderIdPrefix);
-        TransactionDetail transactionDetail = TransactionDetail.builder()
+        String orderId = randomString.generate(orderIdPrefix);
+        TransactionDetail transactionDetail = transactionDetailRepository.save(TransactionDetail.builder()
                 .paymentType(EPaymentType.BALANCE.value)
                 .transferMethod(EPaymentType.BALANCE.value)
                 .user(user.get())
@@ -406,8 +417,7 @@ public class TransactionDetailService {
                 .orderId(orderId)
                 .grossAmount(quotaProduct.get().getGrossAmount())
                 .status(ETransactionDBStatus.SUCCESS.value)
-                .build();
-        transactionDetailRepository.save(transactionDetail);
+                .build());
 
         TransactionDetailQuota transactionDetailQuota = TransactionDetailQuota.builder()
                 .phone(transactionQuotaDto.getPhone())
@@ -470,8 +480,8 @@ public class TransactionDetailService {
         user.get().getCoin().setAmount(user.get().getCoin().getAmount()-cashoutProduct.get().getCoinAmount());
         userRepository.save(user.get());
 
-        String orderId = RandomString.generate(orderIdPrefix);
-        TransactionDetail transactionDetail = TransactionDetail.builder()
+        String orderId = randomString.generate(orderIdPrefix);
+        TransactionDetail transactionDetail = transactionDetailRepository.save(TransactionDetail.builder()
                 .paymentType(EPaymentType.COIN.value)
                 .transferMethod(EPaymentType.COIN.value)
                 .user(user.get())
@@ -480,9 +490,7 @@ public class TransactionDetailService {
                 .orderId(orderId)
                 .grossAmount(cashoutProduct.get().getCoinAmount())
                 .status(ETransactionDBStatus.SUCCESS.value)
-                .build();
-
-        transactionDetailRepository.save(transactionDetail);
+                .build());
 
         TransactionDetailDto transactionDetailDto = TransactionDetailDto.builder()
                 .id(transactionDetail.getId())
@@ -519,17 +527,17 @@ public class TransactionDetailService {
 
     @Transactional
     public ResponseEntity<Object> getNotification(String stringNotificationDto) throws JsonProcessingException {
-        log.info("string notif {}", stringNotificationDto);
+//        log.info("string notif {}", stringNotificationDto);
         NotificationDto notificationDto = objectMapper.readValue(stringNotificationDto, NotificationDto.class);
 
-        String encryptedKey = Encryptor.encryptStringToSHA512(
+        String encryptedKey = encryptor.encryptStringToSHA512(
                 notificationDto.getOrderId() +
                         notificationDto.getStatusCode() +
                         notificationDto.getGrossAmount() +
                         midtransServerKey);
 
-        log.info("sign key {}", notificationDto.getSignatureKey());
-        log.info("encrypted key {}", encryptedKey);
+//        log.info("sign key {}", notificationDto.getSignatureKey());
+//        log.info("encrypted key {}", encryptedKey);
 
         if(!notificationDto.getSignatureKey().equals(encryptedKey)){
             return Response.build("Not authorized", null, null, HttpStatus.BAD_REQUEST);
