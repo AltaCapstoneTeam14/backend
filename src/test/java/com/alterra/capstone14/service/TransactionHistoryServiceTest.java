@@ -57,7 +57,7 @@ public class TransactionHistoryServiceTest {
     private TransactionHistoryService transactionHistoryService;
 
     @Test
-    public void getTransactionHistory_PulsaTest() {
+    public void getTransactionHistoryPulsa_Test() {
         Role userRole = Role.builder().id(1L).name(ERole.USER).build();
 
         Set<Role> roles = new HashSet<>();
@@ -82,9 +82,9 @@ public class TransactionHistoryServiceTest {
                 .productHistoryId(1L)
                 .name("Pulsa 5K")
                 .grossAmount(6000L)
-                .status(EPulsaQuotaStatus.SUCCESS.value)
+                .status(ETransactionDBStatus.SUCCESS.value)
                 .paymentType(EPaymentType.GOPAY.value)
-                .transferMethod("")
+                .transferMethod(EPaymentType.GOPAY.value)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -118,19 +118,19 @@ public class TransactionHistoryServiceTest {
             assertEquals(1L, dataHistory.getUserId());
             assertEquals("1", dataHistory.getOrderId());
             assertEquals(1L, dataHistory.getTransactionDetailId());
-            assertEquals("pulsa", dataHistory.getProductType());
+            assertEquals(EProductType.PULSA.value, dataHistory.getProductType());
             assertEquals(1L, dataHistory.getProductHistoryId());
             assertEquals("Pulsa 5K", dataHistory.getName());
             assertEquals(6000L, dataHistory.getGrossAmount());
-            assertEquals("success", dataHistory.getStatus());
-            assertEquals("gopay", dataHistory.getPaymentType());
-            assertEquals("", dataHistory.getTransferMethod());
+            assertEquals(ETransactionDBStatus.SUCCESS.value, dataHistory.getStatus());
+            assertEquals(EPaymentType.GOPAY.value, dataHistory.getPaymentType());
+            assertEquals(EPaymentType.GOPAY.value, dataHistory.getTransferMethod());
             assertNotNull(dataHistory.getCreatedAt());
         }
     }
 
     @Test
-    void getTransactionHistory_TopupTest() {
+    void getTransactionHistoryTopup_Test() {
         Role userRole = Role.builder().id(1L).name(ERole.USER).build();
 
         Set<Role> roles = new HashSet<>();
@@ -155,7 +155,7 @@ public class TransactionHistoryServiceTest {
                 .productHistoryId(2L)
                 .name("Topup 20K")
                 .grossAmount(21000L)
-                .status(EPulsaQuotaStatus.SUCCESS.value)
+                .status(ETransactionDBStatus.SUCCESS.value)
                 .paymentType(EPaymentType.BANK_TRANSFER.value)
                 .transferMethod(EBankTransfer.BNI.value)
                 .createdAt(LocalDateTime.now())
@@ -189,19 +189,19 @@ public class TransactionHistoryServiceTest {
             assertEquals(1L, dataHistory.getUserId());
             assertEquals("1", dataHistory.getOrderId());
             assertEquals(1L, dataHistory.getTransactionDetailId());
-            assertEquals("topup", dataHistory.getProductType());
+            assertEquals(EProductType.TOPUP.value, dataHistory.getProductType());
             assertEquals(2L, dataHistory.getProductHistoryId());
             assertEquals("Topup 20K", dataHistory.getName());
             assertEquals(21000L, dataHistory.getGrossAmount());
-            assertEquals("success", dataHistory.getStatus());
-            assertEquals("bank_transfer", dataHistory.getPaymentType());
-            assertEquals("bni", dataHistory.getTransferMethod());
+            assertEquals(ETransactionDBStatus.SUCCESS.value, dataHistory.getStatus());
+            assertEquals(EPaymentType.BANK_TRANSFER.value, dataHistory.getPaymentType());
+            assertEquals(EBankTransfer.BNI.value, dataHistory.getTransferMethod());
             assertNotNull(dataHistory.getCreatedAt());
         }
     }
 
     @Test
-    void getTransactionHistory_QuotaTest() {
+    void getTransactionHistoryQuota_Test() {
         Role userRole = Role.builder().id(1L).name(ERole.USER).build();
 
         Set<Role> roles = new HashSet<>();
@@ -226,9 +226,9 @@ public class TransactionHistoryServiceTest {
                 .productHistoryId(3L)
                 .name("Quota 1GB")
                 .grossAmount(10000L)
-                .status(EPulsaQuotaStatus.PENDING.value)
+                .status(ETransactionDBStatus.SUCCESS.value)
                 .paymentType(EPaymentType.BALANCE.value)
-                .transferMethod("")
+                .transferMethod(EPaymentType.BALANCE.value)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -262,19 +262,19 @@ public class TransactionHistoryServiceTest {
             assertEquals(1L, dataHistory.getUserId());
             assertEquals("1", dataHistory.getOrderId());
             assertEquals(1L, dataHistory.getTransactionDetailId());
-            assertEquals("quota", dataHistory.getProductType());
+            assertEquals(EProductType.QUOTA.value, dataHistory.getProductType());
             assertEquals(3L, dataHistory.getProductHistoryId());
             assertEquals("Quota 1GB", dataHistory.getName());
             assertEquals(10000L, dataHistory.getGrossAmount());
-            assertEquals("pending", dataHistory.getStatus());
-            assertEquals("balance", dataHistory.getPaymentType());
-            assertEquals("", dataHistory.getTransferMethod());
+            assertEquals(ETransactionDBStatus.SUCCESS.value, dataHistory.getStatus());
+            assertEquals(EPaymentType.BALANCE.value, dataHistory.getPaymentType());
+            assertEquals(EPaymentType.BALANCE.value, dataHistory.getTransferMethod());
             assertNotNull(dataHistory.getCreatedAt());
         }
     }
 
     @Test
-    void getTransactionHistory_CashoutTest() {
+    void getTransactionHistoryCashout_Test() {
         Role userRole = Role.builder().id(1L).name(ERole.USER).build();
 
         Set<Role> roles = new HashSet<>();
@@ -299,9 +299,9 @@ public class TransactionHistoryServiceTest {
                 .productHistoryId(4L)
                 .name("Cashout 50K")
                 .grossAmount(50000L)
-                .status(ETransactionStatus.CAPTURE.value)
+                .status(ETransactionDBStatus.SUCCESS.value)
                 .paymentType(EPaymentType.BALANCE.value)
-                .transferMethod("")
+                .transferMethod(EPaymentType.BALANCE.value)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -333,13 +333,13 @@ public class TransactionHistoryServiceTest {
             assertEquals(1L, dataHistory.getUserId());
             assertEquals("1", dataHistory.getOrderId());
             assertEquals(1L, dataHistory.getTransactionDetailId());
-            assertEquals("cashout", dataHistory.getProductType());
+            assertEquals(EProductType.CASHOUT.value, dataHistory.getProductType());
             assertEquals(4L, dataHistory.getProductHistoryId());
             assertEquals("Cashout 50K", dataHistory.getName());
             assertEquals(50000L, dataHistory.getGrossAmount());
-            assertEquals("capture", dataHistory.getStatus());
-            assertEquals("balance", dataHistory.getPaymentType());
-            assertEquals("", dataHistory.getTransferMethod());
+            assertEquals(ETransactionDBStatus.SUCCESS.value, dataHistory.getStatus());
+            assertEquals(EPaymentType.BALANCE.value, dataHistory.getPaymentType());
+            assertEquals(EPaymentType.BALANCE.value, dataHistory.getTransferMethod());
             assertNotNull(dataHistory.getCreatedAt());
         }
     }
