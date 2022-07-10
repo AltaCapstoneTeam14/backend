@@ -40,8 +40,9 @@ public class WeeklyLoginService {
         Optional<User> user = userRepository.findByEmail(email);
 
 //        DateCurrentImpl dateCurrent = new DateCurrentImpl();
+        log.info(String.valueOf(user.get().getId()));
 
-        Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByStartDate(dateCurrent.getMonday());
+        Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByUserAndStartDate(user.get().getId(), dateCurrent.getMonday());
         if(weeklyLogin.isEmpty()){
             WeeklyLogin newWeeklyLogin = WeeklyLogin.builder()
                     .user(user.get())
@@ -75,7 +76,7 @@ public class WeeklyLoginService {
         String email = userDetails.getUsername();
         Optional<User> user = userRepository.findByEmail(email);
 
-        Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByStartDate(dateCurrent.getMonday());
+        Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByUserAndStartDate(user.get().getId(), dateCurrent.getMonday());
         if(weeklyLogin.isEmpty()){
             WeeklyLogin newWeeklyLogin = WeeklyLogin.builder()
                     .user(user.get())
