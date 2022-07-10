@@ -86,7 +86,7 @@ public class WeeklyLoginServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
         when(dateCurrent.getMonday()).thenReturn("2022-07-04");
         when(dateCurrent.getDay()).thenReturn(6);
-        when(weeklyLoginRepository.findByStartDate(any())).thenReturn(Optional.ofNullable(weeklyLogin));
+        when(weeklyLoginRepository.findByUserAndStartDate(anyLong(), anyString())).thenReturn(Optional.ofNullable(weeklyLogin));
 
         ResponseEntity<Object> response = weeklyLoginService.getStatus();
 
@@ -139,7 +139,7 @@ public class WeeklyLoginServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
         when(dateCurrent.getMonday()).thenReturn("2022-07-04");
         when(dateCurrent.getDay()).thenReturn(5);
-        when(weeklyLoginRepository.findByStartDate(any())).thenReturn(Optional.ofNullable(weeklyLogin));
+        when(weeklyLoginRepository.findByUserAndStartDate(anyLong(), anyString())).thenReturn(Optional.ofNullable(weeklyLogin));
 
         ResponseEntity<Object> response = weeklyLoginService.getStatus();
 
@@ -192,7 +192,7 @@ public class WeeklyLoginServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
         when(dateCurrent.getMonday()).thenReturn("2022-07-04");
         when(dateCurrent.getDay()).thenReturn(5);
-        when(weeklyLoginRepository.findByStartDate(any())).thenReturn(Optional.empty());
+        when(weeklyLoginRepository.findByUserAndStartDate(anyLong(), anyString())).thenReturn(Optional.empty());
         when(weeklyLoginRepository.save(any())).thenReturn(weeklyLogin);
 
         ResponseEntity<Object> response = weeklyLoginService.getStatus();
@@ -247,7 +247,7 @@ public class WeeklyLoginServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
         when(dateCurrent.getMonday()).thenReturn("2022-07-04");
         when(dateCurrent.getDay()).thenReturn(6);
-        when(weeklyLoginRepository.findByStartDate(any())).thenReturn(Optional.ofNullable(weeklyLogin));
+        when(weeklyLoginRepository.findByUserAndStartDate(anyLong(), anyString())).thenReturn(Optional.ofNullable(weeklyLogin));
         when(weeklyLoginRepository.save(any())).thenReturn(weeklyLogin);
         when(userRepository.save(any())).thenReturn(user);
 
@@ -304,7 +304,7 @@ public class WeeklyLoginServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
         when(dateCurrent.getMonday()).thenReturn("2022-07-04");
         when(dateCurrent.getDay()).thenReturn(7);
-        when(weeklyLoginRepository.findByStartDate(any())).thenReturn(Optional.ofNullable(weeklyLogin));
+        when(weeklyLoginRepository.findByUserAndStartDate(anyLong(), anyString())).thenReturn(Optional.ofNullable(weeklyLogin));
         when(weeklyLoginRepository.save(any())).thenReturn(weeklyLogin);
         when(userRepository.save(any())).thenReturn(user);
 
@@ -361,7 +361,7 @@ public class WeeklyLoginServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
         when(dateCurrent.getMonday()).thenReturn("2022-07-04");
         when(dateCurrent.getDay()).thenReturn(7);
-        when(weeklyLoginRepository.findByStartDate(any())).thenReturn(Optional.empty());
+        when(weeklyLoginRepository.findByUserAndStartDate(anyLong(), anyString())).thenReturn(Optional.empty());
         when(weeklyLoginRepository.save(any())).thenReturn(weeklyLogin);
         when(userRepository.save(any())).thenReturn(user);
 
