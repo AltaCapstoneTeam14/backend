@@ -36,3 +36,4 @@ build/
 /src/main/java/com/alterra/capstone14/repository/TestRepository.java
 /src/main/java/com/alterra/capstone14/domain/dao/Test.java
 /src/main/java/com/alterra/capstone14/controller/TestController.java
+/.env.dev

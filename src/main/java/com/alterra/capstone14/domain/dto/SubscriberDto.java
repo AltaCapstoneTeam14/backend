@@ -21,4 +21,12 @@ public class SubscriberDto {
     @Email(message = "The email address is invalid.")
     private String email;
 
+    @Override
+    public String toString() {
+        return String.format(
+                "{" +
+                        "\"updateEnabled\":false," +
+                        "\"email\":\"%s\"" +
+                "}", email);
+    }
 }
