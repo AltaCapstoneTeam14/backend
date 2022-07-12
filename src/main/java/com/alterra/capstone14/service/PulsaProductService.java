@@ -2,6 +2,7 @@ package com.alterra.capstone14.service;
 
 import com.alterra.capstone14.domain.dao.Provider;
 import com.alterra.capstone14.domain.dao.PulsaProduct;
+import com.alterra.capstone14.domain.dto.ProviderDto;
 import com.alterra.capstone14.domain.dto.PulsaProductDto;
 import com.alterra.capstone14.repository.ProviderRepository;
 import com.alterra.capstone14.repository.PulsaProductRepository;
@@ -33,9 +34,13 @@ public class PulsaProductService {
             return Response.build(Response.notFound("Provider"), null, null, HttpStatus.BAD_REQUEST);
         }
 
-        PulsaProduct pulsaProduct = modelMapper.map(pulsaProductDto, PulsaProduct.class);
-        pulsaProduct.setProvider(provider.get());
-
+        PulsaProduct pulsaProduct = pulsaProductRepository.save(PulsaProduct.builder()
+                .name(pulsaProductDto.getName())
+                .denom(pulsaProductDto.getDenom())
+                .grossAmount(pulsaProductDto.getGrossAmount())
+                .provider(provider.get())
+                .stock(pulsaProductDto.getStock())
+                .build());
         pulsaProductRepository.save(pulsaProduct);
 
         PulsaProductDto pulsaProductDto1 = PulsaProductDto.builder()
