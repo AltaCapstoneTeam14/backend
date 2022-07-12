@@ -141,7 +141,7 @@ public class TransactionDetailService {
         log.info("req body {}", gopayBody.toString());
 
         String response = webClient.post()
-                .uri(midtransBaseUrl+"/charge")
+                .uri(midtransBaseUrl+"/v2/charge")
                 .header(HttpHeaders.AUTHORIZATION, midtransAuthHeader)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -169,9 +169,6 @@ public class TransactionDetailService {
                 .actions(gopayChargeRes.getActions())
                 .status(transactionDetail.getStatus())
                 .build();
-
-
-
 
         //create transaction history
         TransactionHistoryTopup transactionHistoryTopup = TransactionHistoryTopup.builder()
@@ -242,7 +239,7 @@ public class TransactionDetailService {
         log.info("req body {}", bankTransferBody.toString());
 
         String response = webClient.post()
-                .uri(midtransBaseUrl + "/charge")
+                .uri(midtransBaseUrl + "/v2/charge")
                 .header(HttpHeaders.AUTHORIZATION, midtransAuthHeader)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

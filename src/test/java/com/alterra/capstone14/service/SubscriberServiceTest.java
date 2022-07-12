@@ -1,9 +1,13 @@
 package com.alterra.capstone14.service;
 
+import com.alterra.capstone14.constant.EResponseStatus;
 import com.alterra.capstone14.domain.common.ApiResponse;
 import com.alterra.capstone14.domain.dao.Subscriber;
 import com.alterra.capstone14.domain.dto.SubscriberDto;
+import com.alterra.capstone14.domain.resBody.AllSubscriberRes;
 import com.alterra.capstone14.repository.SubscriberRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,8 +15,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +28,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -39,31 +47,14 @@ public class SubscriberServiceTest {
     @Autowired
     SubscriberService subscriberService;
 
-    @Test
-    void addSubscriberSuccess_Test(){
+    @MockBean
+    WebClient webClient;
 
-        Subscriber subscriber = Subscriber.builder().id(1L).email("joe@gmail.com").build();
-        SubscriberDto subscriberDto = SubscriberDto.builder().id(1L).email("joe@gmail.com").build();
-
-        when(subscriberRepository.findByEmail(any())).thenReturn(Optional.ofNullable(subscriber));
-        when(modelMapper.map(any(), eq(SubscriberDto.class))).thenReturn(subscriberDto);
-
-        ResponseEntity<Object> response = subscriberService.addSubscriber(SubscriberDto.builder().email("joe@gmail.com").build());
-
-        ApiResponse apiResponse = (ApiResponse) response.getBody();
-        SubscriberDto data = (SubscriberDto) Objects.requireNonNull(apiResponse).getData();
-
-        assertEquals("Add subscriber success", apiResponse.getMessage());
-        assertEquals("201", apiResponse.getCode());
-        assertNotNull(apiResponse.getTimestamp());
-        assertNull(apiResponse.getErrors());
-        assertNotNull(apiResponse.getData());
-        assertEquals(1L, data.getId());
-        assertEquals("joe@gmail.com", data.getEmail());
-    }
+    @MockBean
+    ObjectMapper objectMapper;
 
     @Test
-    void addSubscriberNewSubscriber_Test(){
+    void addSubscriberSuccess_Test() throws JsonProcessingException {
 
         Subscriber subscriber = Subscriber.builder().id(1L).email("joe@gmail.com").build();
         SubscriberDto subscriberDto = SubscriberDto.builder().id(1L).email("joe@gmail.com").build();
@@ -71,7 +62,23 @@ public class SubscriberServiceTest {
         when(subscriberRepository.findByEmail(any())).thenReturn(Optional.empty());
         when(modelMapper.map(any(), eq(Subscriber.class))).thenReturn(subscriber);
         when(subscriberRepository.save(any())).thenReturn(subscriber);
+
+        var reqBodyUriSpecMock = mock(WebClient.RequestBodyUriSpec.class);
+        var reqHeadersSpecMock = mock(WebClient.RequestHeadersSpec.class);
+        var monoMock = mock(Mono.class);
+        var webClientResponse = EResponseStatus.SUCCESS.value;
+
+        when(webClient.post()).thenReturn(reqBodyUriSpecMock);
+        when(reqBodyUriSpecMock.uri(anyString())).thenReturn(reqBodyUriSpecMock);
+        when(reqBodyUriSpecMock.header(anyString(), anyString())).thenReturn(reqBodyUriSpecMock);
+        when(reqBodyUriSpecMock.accept(MediaType.APPLICATION_JSON)).thenReturn(reqBodyUriSpecMock);
+        when(reqBodyUriSpecMock.contentType(MediaType.APPLICATION_JSON)).thenReturn(reqBodyUriSpecMock);
+        when(reqBodyUriSpecMock.bodyValue(anyString())).thenReturn(reqHeadersSpecMock);
+        when(reqHeadersSpecMock.exchangeToMono(any())).thenReturn(monoMock);
+        when(monoMock.block()).thenReturn(webClientResponse);
+
         when(modelMapper.map(any(), eq(SubscriberDto.class))).thenReturn(subscriberDto);
+
 
         ResponseEntity<Object> response = subscriberService.addSubscriber(SubscriberDto.builder().email("joe@gmail.com").build());
 
@@ -88,13 +95,30 @@ public class SubscriberServiceTest {
     }
 
     @Test
-    void getSubscriberSuccess_Test(){
+    void getSubscriberSuccess_Test() throws JsonProcessingException {
         Subscriber subscriber = Subscriber.builder().id(1L).email("joe@gmail.com").build();
+        SubscriberDto subscriberDto = SubscriberDto.builder().id(1L).email("joe@gmail.com").build();
 
-        List<Subscriber> subscriberList = new ArrayList<>();
-        subscriberList.add(subscriber);
+        List<SubscriberDto> subscriberList = new ArrayList<>();
+        subscriberList.add(subscriberDto);
 
-        when(subscriberRepository.findAll()).thenReturn(subscriberList);
+        AllSubscriberRes allSubscriberRes = AllSubscriberRes.builder()
+                .contacts(subscriberList)
+                .count(1)
+                .build();
+
+        var reqHeaderUriSpecMock = mock(WebClient.RequestHeadersUriSpec.class);
+        var reqHeadersSpecMock = mock(WebClient.RequestHeadersSpec.class);
+        var monoMock = mock(Mono.class);
+        var webClientResponse = "String";
+
+        when(webClient.get()).thenReturn(reqHeaderUriSpecMock);
+        when(reqHeaderUriSpecMock.uri(anyString())).thenReturn(reqHeadersSpecMock);
+        when(reqHeadersSpecMock.header(anyString(), anyString())).thenReturn(reqHeadersSpecMock);
+        when(reqHeadersSpecMock.accept(MediaType.APPLICATION_JSON)).thenReturn(reqHeadersSpecMock);
+        when(reqHeadersSpecMock.exchangeToMono(any())).thenReturn(monoMock);
+        when(monoMock.block()).thenReturn(webClientResponse);
+        when(objectMapper.readValue(anyString(), eq(AllSubscriberRes.class))).thenReturn(allSubscriberRes);
 
         ResponseEntity<Object> response = subscriberService.getSubscribers();
 
@@ -111,33 +135,29 @@ public class SubscriberServiceTest {
 
 
     @Test
-    void deleteCashoutProductSuccess_Test() {
+    void deleteSubscriberProductSuccess_Test() {
         Subscriber subscriber = Subscriber.builder().id(1L).email("joe@gmail.com").build();
 
-        when(subscriberRepository.findById(any())).thenReturn(Optional.ofNullable(subscriber));
+        when(subscriberRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(subscriber));
 
-        ResponseEntity<Object> response = subscriberService.deleteSubscriber(1L);
+        var reqHeaderUriSpecMock = mock(WebClient.RequestHeadersUriSpec.class);
+        var reqHeadersSpecMock = mock(WebClient.RequestHeadersSpec.class);
+        var monoMock = mock(Mono.class);
+        var webClientResponse = EResponseStatus.SUCCESS.value;
 
+        when(webClient.delete()).thenReturn(reqHeaderUriSpecMock);
+        when(reqHeaderUriSpecMock.uri(anyString())).thenReturn(reqHeadersSpecMock);
+        when(reqHeadersSpecMock.header(anyString(), anyString())).thenReturn(reqHeadersSpecMock);
+        when(reqHeadersSpecMock.accept(MediaType.APPLICATION_JSON)).thenReturn(reqHeadersSpecMock);
+        when(reqHeadersSpecMock.exchangeToMono(any())).thenReturn(monoMock);
+        when(monoMock.block()).thenReturn(webClientResponse);
+
+        ResponseEntity<Object> response = subscriberService.deleteSubscriber("joe@gmail.com");
 
         ApiResponse apiResponse = (ApiResponse) response.getBody();
 
         assertEquals("Delete subscriber success", apiResponse.getMessage());
         assertEquals("201", apiResponse.getCode());
-        assertNotNull(apiResponse.getTimestamp());
-        assertNull(apiResponse.getErrors());
-        assertNull(apiResponse.getData());
-    }
-
-    @Test
-    void deleteCashoutProductNotFound_Test(){
-        when(subscriberRepository.findById(any())).thenReturn(Optional.empty());
-
-        ResponseEntity<Object> response = subscriberService.deleteSubscriber(1L);
-
-        ApiResponse apiResponse = (ApiResponse) response.getBody();
-
-        assertEquals("Subscriber not found", apiResponse.getMessage());
-        assertEquals("400", apiResponse.getCode());
         assertNotNull(apiResponse.getTimestamp());
         assertNull(apiResponse.getErrors());
         assertNull(apiResponse.getData());

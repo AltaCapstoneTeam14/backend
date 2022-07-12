@@ -2,6 +2,7 @@ package com.alterra.capstone14.controller;
 
 import com.alterra.capstone14.domain.dto.SubscriberDto;
 import com.alterra.capstone14.service.SubscriberService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,13 +23,13 @@ public class SubscriberController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> addSubscriber(@Valid @RequestBody SubscriberDto subscriberDto) {
+    public ResponseEntity<Object> addSubscriber(@Valid @RequestBody SubscriberDto subscriberDto) throws JsonProcessingException {
         return subscriberService.addSubscriber(subscriberDto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{email}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Object> deleteSubscriber(@PathVariable Long id) {
-        return subscriberService.deleteSubscriber(id);
+    public ResponseEntity<Object> deleteSubscriber(@PathVariable String email) {
+        return subscriberService.deleteSubscriber(email);
     }
 }
