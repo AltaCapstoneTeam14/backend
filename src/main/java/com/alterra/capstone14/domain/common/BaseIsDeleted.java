@@ -1,5 +1,7 @@
 package com.alterra.capstone14.domain.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,9 +19,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @MappedSuperclass
+//@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseIsDeleted extends BaseUpdatedAt{
+    @JsonIgnore
     @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    private boolean isDeleted;
 
     @PrePersist
     void onCreate(){

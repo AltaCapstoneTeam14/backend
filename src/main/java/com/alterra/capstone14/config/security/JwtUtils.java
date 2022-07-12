@@ -15,10 +15,10 @@ import java.util.Date;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${alterra.miniapp.jwtSecret}")
+    @Value("${com.bishapay.jwtSecret}")
     private String jwtSecret;
 
-    @Value("${alterra.miniapp.jwtExpirationMs}")
+    @Value("${com.bishapay.jwtExpirationMs}")
     private int jwtExpirationMs;
 
     public String generateJwtToken(Authentication authentication) {

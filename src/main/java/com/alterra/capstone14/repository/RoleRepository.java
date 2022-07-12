@@ -1,6 +1,6 @@
 package com.alterra.capstone14.repository;
 
-import com.alterra.capstone14.domain.dao.ERole;
+import com.alterra.capstone14.constant.ERole;
 import com.alterra.capstone14.domain.dao.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

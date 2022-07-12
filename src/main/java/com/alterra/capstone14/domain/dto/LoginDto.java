@@ -17,7 +17,7 @@ import javax.validation.constraints.Size;
 public class LoginDto extends EmailDto{
 
     @NotBlank(message = "Password is required!")
-    @Size(min = 8, message = "The length of phone must be at least 8 characters.")
+    @Size(min = 8, message = "The length of password must be at least 8 characters.")
     private String password;
 
 }

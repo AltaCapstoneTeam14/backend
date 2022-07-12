@@ -1,5 +1,6 @@
 package com.alterra.capstone14.domain.dao;
 
+import com.alterra.capstone14.constant.ERole;
 import lombok.*;
 
 import javax.persistence.*;

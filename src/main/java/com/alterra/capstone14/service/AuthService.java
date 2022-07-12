@@ -1,15 +1,19 @@
 package com.alterra.capstone14.service;
 
 import com.alterra.capstone14.config.security.JwtUtils;
-import com.alterra.capstone14.domain.dao.ERole;
-import com.alterra.capstone14.domain.dao.Role;
-import com.alterra.capstone14.domain.dao.User;
+import com.alterra.capstone14.constant.ERole;
+import com.alterra.capstone14.domain.dao.*;
 import com.alterra.capstone14.domain.dto.LoginDto;
+import com.alterra.capstone14.domain.dto.TokenDto;
 import com.alterra.capstone14.domain.dto.UserDto;
+import com.alterra.capstone14.domain.dto.UserNoPwdDto;
+import com.alterra.capstone14.repository.BalanceRepository;
+import com.alterra.capstone14.repository.CoinRepository;
 import com.alterra.capstone14.repository.RoleRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.util.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +24,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
 import java.util.*;
 
 @Service
@@ -33,6 +36,12 @@ public class AuthService {
     RoleRepository roleRepository;
 
     @Autowired
+    BalanceRepository balanceRepository;
+
+    @Autowired
+    CoinRepository coinRepository;
+
+    @Autowired
     PasswordEncoder encoder;
 
     @Autowired
@@ -41,18 +50,21 @@ public class AuthService {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     public ResponseEntity<Object> registerUser(UserDto userDto) {
         if (Boolean.TRUE.equals(userRepository.existsByEmail(userDto.getEmail()))) {
-            return Response.build(Response.exist("user", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
+            return Response.build(Response.exist("User", "email", userDto.getEmail()), null, null, HttpStatus.BAD_REQUEST);
         }
 
-        User user = User.builder()
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .password(encoder.encode(userDto.getPassword()))
-                .build();
+        if (Boolean.TRUE.equals(userRepository.existsByPhone(userDto.getPhone()))) {
+            return Response.build(Response.exist("User", "phone", userDto.getPhone()), null, null, HttpStatus.BAD_REQUEST);
+        }
 
-        Set<String> strRoles = userDto.getRoles();
+        User user = modelMapper.map(userDto, User.class);
+        user.setPassword(encoder.encode(userDto.getPassword()));
+
         Set<Role> roles = new HashSet<>();
 
         Optional<Role> userRole = roleRepository.findByName(ERole.USER);
@@ -65,25 +77,32 @@ public class AuthService {
         user.setRoles(roles);
         userRepository.save(user);
 
-        UserDto userNoPasswordDto = UserDto.builder()
+        Balance balance = Balance.builder().user(user).amount(0L).build();
+        balanceRepository.save(balance);
+
+        Coin coin = Coin.builder().user(user).amount(0L).build();
+        coinRepository.save(coin);
+
+        UserNoPwdDto userNoPasswordDto = UserNoPwdDto.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
+                .phone(user.getPhone())
                 .createdAt(user.getCreatedAt())
                 .build();
 
-        return Response.build(Response.add("User"), userNoPasswordDto, null, HttpStatus.CREATED);
+        return Response.build("Register success", userNoPasswordDto, null, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> loginUser(LoginDto loginDto) {
         if (Boolean.FALSE.equals(userRepository.existsByEmail(loginDto.getEmail()))) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<User> user = userRepository.findByEmail(loginDto.getEmail());
         Boolean isPasswordCorrect = encoder.matches(loginDto.getPassword(), user.get().getPassword());
         if (Boolean.FALSE.equals(isPasswordCorrect)) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -93,15 +112,14 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtUtils.generateJwtToken(authentication);
-        Map<String, String> token = new HashMap<>();
-        token.put("token", jwt);
+        TokenDto token = TokenDto.builder().token(jwt).build();
 
         return Response.build("Login success", token, null, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> loginAdmin(LoginDto loginDto) {
         if (Boolean.FALSE.equals(userRepository.existsByEmail(loginDto.getEmail()))) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<User> user = userRepository.findByEmail(loginDto.getEmail());
@@ -112,12 +130,12 @@ public class AuthService {
         }
 
         if(!user.get().getRoles().contains(adminRole.get())){
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Boolean isPasswordCorrect = encoder.matches(loginDto.getPassword(), user.get().getPassword());
         if (Boolean.FALSE.equals(isPasswordCorrect)) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -127,15 +145,14 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtUtils.generateJwtToken(authentication);
-        Map<String, String> token = new HashMap<>();
-        token.put("token", jwt);
+        TokenDto token = TokenDto.builder().token(jwt).build();
 
         return Response.build("Login success", token, null, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> loginSuperAdmin(LoginDto loginDto) {
         if (Boolean.FALSE.equals(userRepository.existsByEmail(loginDto.getEmail()))) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Optional<User> user = userRepository.findByEmail(loginDto.getEmail());
@@ -147,12 +164,12 @@ public class AuthService {
 
         if(!user.get().getRoles().contains(superAdminRole.get())){
             log.info("user don't have super admin role");
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Boolean isPasswordCorrect = encoder.matches(loginDto.getPassword(), user.get().getPassword());
         if (Boolean.FALSE.equals(isPasswordCorrect)) {
-            return Response.build("email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
+            return Response.build("Email or password incorrect", null, null, HttpStatus.BAD_REQUEST);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -162,8 +179,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtUtils.generateJwtToken(authentication);
-        Map<String, String> token = new HashMap<>();
-        token.put("token", jwt);
+        TokenDto token = TokenDto.builder().token(jwt).build();
 
         return Response.build("Login success", token, null, HttpStatus.OK);
     }
