@@ -74,4 +74,4 @@ jobs:
             docker stop capstone14-be
             docker rmi hamidbae/capstone14-be-alterra:latest
             docker pull hamidbae/capstone14-be-alterra:latest
-            docker run -d --rm --name capstone14-be -p 80:8080 --env --env-file=.env.prod --network c14-network hamidbae/capstone14-be-alterra:latest
+            docker run -d --rm --name capstone14-be -p 80:8080 --env-file=.env.prod --network bishapay-network hamidbae/capstone14-be-alterra:latest
