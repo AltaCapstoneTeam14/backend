@@ -48,7 +48,6 @@ public class PulsaProductServiceTest {
     @Test
     void addPulsaProductServiceSuccess_Test(){
         Provider provider = Provider.builder().id(1L).name("Telkomsel").build();
-        ProviderDto providerDto = ProviderDto.builder().id(1L).name("Telkomsel").build();
 
         PulsaProduct pulsaProduct = PulsaProduct.builder()
                 .id(1L)
@@ -56,10 +55,10 @@ public class PulsaProductServiceTest {
                 .denom(20000L)
                 .grossAmount(21000L)
                 .stock(10L)
+                .provider(provider)
                 .build();
 
         when(providerRepository.findById(any())).thenReturn(Optional.ofNullable(provider));
-        when(modelMapper.map(any(), eq(PulsaProduct.class))).thenReturn(pulsaProduct);
         when(pulsaProductRepository.save(any())).thenReturn(pulsaProduct);
 
         ResponseEntity<Object> response = pulsaProductService.addPulsaProduct(
