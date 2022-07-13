@@ -86,7 +86,7 @@ public class ForgotPasswordService {
             return Response.build("Bad request", null, null, HttpStatus.BAD_REQUEST);
         }
 
-        return Response.build("Request reset password sent", emailDto, null, HttpStatus.CREATED);
+        return Response.build("Request reset password sent to your email", emailDto, null, HttpStatus.CREATED);
     }
 
     @Transactional

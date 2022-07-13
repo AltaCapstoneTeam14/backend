@@ -103,7 +103,7 @@ public class ForgotPasswordServiceTest {
         ApiResponse apiResponse = (ApiResponse) response.getBody();
         EmailDto data = (EmailDto) Objects.requireNonNull(apiResponse).getData();
 
-        assertEquals("Request reset password sent", apiResponse.getMessage());
+        assertEquals("Request reset password sent to your email", apiResponse.getMessage());
         assertEquals("201", apiResponse.getCode());
         assertNotNull(apiResponse.getTimestamp());
         assertNull(apiResponse.getErrors());
