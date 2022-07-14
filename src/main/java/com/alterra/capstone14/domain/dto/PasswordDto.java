@@ -13,9 +13,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PasswordDto {
-
     @NotBlank(message = "Password is required!")
     @Size(min = 8, message = "The length of password must be at least 8 characters.")
     private String password;
-
 }

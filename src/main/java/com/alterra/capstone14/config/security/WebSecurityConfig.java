@@ -70,6 +70,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers( "/v1/products/**").permitAll()
                 .antMatchers( "/v1/test/**").permitAll()
                 .antMatchers( "/v1/subscribers/**").permitAll()
+                .antMatchers( "/v1/reset-password/**").permitAll()
                 .anyRequest().authenticated();
 
         http.headers().frameOptions().disable();

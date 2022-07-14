@@ -232,11 +232,11 @@ public class AuthServiceTest {
                 .password("password")
                 .build();
 
-        Mockito.when(userRepository.existsByEmail(any())).thenReturn(Boolean.TRUE);
-        Mockito.when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
-        Mockito.when(encoder.matches(any(), any())).thenReturn(Boolean.TRUE);
-        Mockito.when(authenticationManager.authenticate(any())).thenReturn(new CustomAuthentication());
-        Mockito.when(jwtUtils.generateJwtToken(any())).thenReturn("token");
+        when(userRepository.existsByEmail(any())).thenReturn(Boolean.TRUE);
+        when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
+        when(encoder.matches(any(), any())).thenReturn(Boolean.TRUE);
+        when(authenticationManager.authenticate(any())).thenReturn(new CustomAuthentication());
+        when(jwtUtils.generateJwtToken(any())).thenReturn("token");
 
         ResponseEntity<Object> response = authService.loginUser(loginDto);
 
