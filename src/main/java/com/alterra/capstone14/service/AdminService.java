@@ -46,14 +46,12 @@ public class AdminService {
 
         users.forEach(user -> {
             if(Boolean.FALSE.equals(balanceRepository.existsByUserId(user.getId()))){
-                Balance newBalance = Balance.builder().user(user).amount(0L).build();
-                balanceRepository.save(newBalance);
+                Balance newBalance = balanceRepository.save(Balance.builder().user(user).amount(0L).build());
                 user.setBalance(newBalance);
             }
 
             if(Boolean.FALSE.equals(coinRepository.existsByUserId(user.getId()))){
-                Coin newCoin = Coin.builder().user(user).amount(0L).build();
-                coinRepository.save(newCoin);
+                Coin newCoin = coinRepository.save(Coin.builder().user(user).amount(0L).build());
                 user.setCoin(newCoin);
             }
 

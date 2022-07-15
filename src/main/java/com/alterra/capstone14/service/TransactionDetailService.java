@@ -3,10 +3,10 @@ package com.alterra.capstone14.service;
 import com.alterra.capstone14.constant.*;
 import com.alterra.capstone14.domain.dao.*;
 import com.alterra.capstone14.domain.dto.*;
-import com.alterra.capstone14.domain.reqbody.BankTransferBody;
-import com.alterra.capstone14.domain.reqbody.GopayBody;
-import com.alterra.capstone14.domain.resBody.BankChargeRes;
-import com.alterra.capstone14.domain.resBody.GopayChargeRes;
+import com.alterra.capstone14.domain.thirdparty.req.BankTransferBody;
+import com.alterra.capstone14.domain.thirdparty.req.GopayBody;
+import com.alterra.capstone14.domain.thirdparty.res.BankChargeRes;
+import com.alterra.capstone14.domain.thirdparty.res.GopayChargeRes;
 import com.alterra.capstone14.repository.*;
 import com.alterra.capstone14.util.Encryptor;
 import com.alterra.capstone14.util.RandomString;
@@ -118,7 +118,6 @@ public class TransactionDetailService {
 
         // create topup detail and add to db
         String orderId = randomString.generate(orderIdPrefix);
-        log.info(orderId);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.GOPAY.value)
                 .transferMethod(EPaymentType.GOPAY.value)
@@ -138,8 +137,6 @@ public class TransactionDetailService {
                 .grossAmount(transactionDetail.getGrossAmount())
                 .build();
 
-        log.info("req body {}", gopayBody.toString());
-
         String response = webClient.post()
                 .uri(midtransBaseUrl+"/v2/charge")
                 .header(HttpHeaders.AUTHORIZATION, midtransAuthHeader)
@@ -149,8 +146,6 @@ public class TransactionDetailService {
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
-
-        log.info("response web client : {}", response);
 
         GopayChargeRes gopayChargeRes = objectMapper.readValue(response, GopayChargeRes.class);
         if(gopayChargeRes.getStatusCode().equals(String.valueOf(HttpStatus.CREATED.value()))){
@@ -208,7 +203,6 @@ public class TransactionDetailService {
         // create topup detail and add to db
         // bank_transfer either bca, bni / bri
         String orderId = randomString.generate(orderIdPrefix);
-        log.info(orderId);
         TransactionDetail transactionDetail = TransactionDetail.builder()
                 .paymentType(EPaymentType.BANK_TRANSFER.value)
                 .user(user.get())
@@ -236,8 +230,6 @@ public class TransactionDetailService {
                 .bank(transactionDetail.getTransferMethod())
                 .build();
 
-        log.info("req body {}", bankTransferBody.toString());
-
         String response = webClient.post()
                 .uri(midtransBaseUrl + "/v2/charge")
                 .header(HttpHeaders.AUTHORIZATION, midtransAuthHeader)
@@ -246,8 +238,6 @@ public class TransactionDetailService {
                 .bodyValue(bankTransferBody.toString())
                 .retrieve()
                 .bodyToMono(String.class).block();
-
-        log.info("response : {}", response);
 
         BankChargeRes bankChargeRes = objectMapper.readValue(response, BankChargeRes.class);
         if(bankChargeRes.getStatusCode().equals(String.valueOf(HttpStatus.CREATED.value()))){
@@ -339,7 +329,6 @@ public class TransactionDetailService {
                 .build();
         transactionDetailPulsaRepository.save(transactionDetailPulsa);
 
-        log.info(transactionDetail.getCreatedAt().toString());
         TransactionDetailWithCoinDto transactionDetailDto = TransactionDetailWithCoinDto.builder()
                 .id(transactionDetail.getId())
                 .orderId(transactionDetail.getOrderId())
@@ -524,7 +513,6 @@ public class TransactionDetailService {
 
     @Transactional
     public ResponseEntity<Object> getNotification(String stringNotificationDto) throws JsonProcessingException {
-//        log.info("string notif {}", stringNotificationDto);
         NotificationDto notificationDto = objectMapper.readValue(stringNotificationDto, NotificationDto.class);
 
         String encryptedKey = encryptor.encryptStringToSHA512(
@@ -532,9 +520,6 @@ public class TransactionDetailService {
                         notificationDto.getStatusCode() +
                         notificationDto.getGrossAmount() +
                         midtransServerKey);
-
-//        log.info("sign key {}", notificationDto.getSignatureKey());
-//        log.info("encrypted key {}", encryptedKey);
 
         if(!notificationDto.getSignatureKey().equals(encryptedKey)){
             return Response.build("Not authorized", null, null, HttpStatus.BAD_REQUEST);
@@ -549,12 +534,12 @@ public class TransactionDetailService {
         if(transactionDetail.isEmpty()){
             return Response.build(Response.notFound("transaction detail"), null, null, HttpStatus.BAD_REQUEST);
         }
-//        log.info(transactionDetail.get().getStatus());
+
         Optional<TransactionDetailTopup> transactionDetailTopup = transactionDetailTopupRepository.findByTransactionDetailId(transactionDetail.get().getId());
         if(transactionDetailTopup.isEmpty()){
             return Response.build(Response.notFound("transaction detail topup"), null, null, HttpStatus.BAD_REQUEST);
         }
-//        log.info(String.valueOf(transactionDetailTopup.get().getJsonNotification()));
+
         transactionDetailTopup.get().setJsonNotification(stringNotificationDto);
         transactionDetailTopupRepository.save(transactionDetailTopup.get());
 
@@ -590,11 +575,9 @@ public class TransactionDetailService {
                         .amount(productTopup.get().getAmount())
                         .build();
                 balanceRepository.save(newBalance);
-                log.info("User balance : {}", newBalance.getAmount());
             } else {
                 balance.get().setAmount(balance.get().getAmount() + productTopup.get().getAmount());
                 balanceRepository.save(balance.get());
-                log.info("User balance : {}", balance.get().getAmount());
             }
 
             Optional<Coin> coin = coinRepository.findByUserId(transactionDetail.get().getUser().getId());
@@ -604,14 +587,11 @@ public class TransactionDetailService {
                         .amount(productTopup.get().getGrossAmount()/500)
                         .build();
                 coinRepository.save(newCoin);
-                log.info("User coin : {}", newCoin.getAmount());
             } else {
                 coin.get().setAmount(coin.get().getAmount() + (productTopup.get().getGrossAmount()/500));
                 coinRepository.save(coin.get());
-                log.info("User coin : {}", coin.get().getAmount());
             }
         }
-        log.info("Transaction status : {}", transactionDetail.get().getStatus());
 
         //update transaction history
         Optional<TransactionHistory> transactionHistory = transactionHistoryRepository.findByOrderId(transactionDetail.get().getOrderId());

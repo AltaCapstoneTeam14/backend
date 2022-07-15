@@ -1,4 +1,4 @@
-package com.alterra.capstone14.domain.reqbody;
+package com.alterra.capstone14.domain.thirdparty.req;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -22,15 +22,4 @@ public class BankTransferBody extends GopayBody {
                         "}" +
                 "}", super.getPaymentType(), super.transactionDetailString(), bank);
     }
-
-//    public String toStringDev() {
-//        return String.format(
-//                "{" +
-//                        "\"payment_type\":\"%s\"," +
-//                        "\"transaction_details\":%s," +
-//                        "\"bank_transfer\":{" +
-//                            "\"bank\":\"%s\"" +
-//                        "}" +
-//                "}", super.getPaymentType(), super.transactionDetailStringDev(), bank);
-//    }
 }

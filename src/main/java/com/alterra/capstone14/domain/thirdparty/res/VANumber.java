@@ -1,8 +1,7 @@
-package com.alterra.capstone14.domain.resBody;
+package com.alterra.capstone14.domain.thirdparty.res;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
