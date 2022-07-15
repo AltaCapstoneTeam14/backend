@@ -1,4 +1,4 @@
-package com.alterra.capstone14.domain.reqbody;
+package com.alterra.capstone14.domain.thirdparty.req;
 
 public class ForgotPasswordBody {
 

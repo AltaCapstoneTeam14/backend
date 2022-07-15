@@ -68,8 +68,6 @@ public class TransactionHistoryService {
                     .dateString(transactionHistory.getCreatedAt().format(formatter))
                     .build();
 
-            log.info(transactionHistory.getCreatedAt().format(formatter));
-
             if(transactionHistory.getProductType().equals(EProductType.TOPUP.value)){
                 Optional<TransactionHistoryTopup> transactionHistoryTopup = transactionHistoryTopupRepository.findById(transactionHistory.getProductHistoryId());
                 transactionHistoryDto.setProduct(TransactionHistoryTopupDto.builder()

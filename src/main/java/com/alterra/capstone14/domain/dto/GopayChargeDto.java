@@ -1,6 +1,6 @@
 package com.alterra.capstone14.domain.dto;
 
-import com.alterra.capstone14.domain.resBody.GopayAction;
+import com.alterra.capstone14.domain.thirdparty.res.GopayAction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 

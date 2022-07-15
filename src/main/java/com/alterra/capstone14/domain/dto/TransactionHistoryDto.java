@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class TransactionHistoryDto <T>{
-    @JsonProperty("id")
     private Long id;
 
     @JsonProperty("user_id")

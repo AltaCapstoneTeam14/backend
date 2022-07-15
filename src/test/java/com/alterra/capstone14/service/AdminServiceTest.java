@@ -98,7 +98,7 @@ public class AdminServiceTest {
     }
 
     @Test
-    void getAllUserNoBalanceSuccess_Test(){
+    void getAllUserNoBalance_Test(){
 
         User user = User.builder()
                 .id(1L)
@@ -114,7 +114,6 @@ public class AdminServiceTest {
         Coin coin = Coin.builder().id(1L).user(user).amount(9000L).build();
 
         user.setCoin(coin);
-        user.setBalance(balance);
 
         List<User> userList = new ArrayList<>();
         userList.add(user);
@@ -122,7 +121,8 @@ public class AdminServiceTest {
         Page<User> users = new PageImpl<>(List.of(user), pageable, 1);
 
         when(userRepository.findAll(pageable)).thenReturn(users);
-        when(balanceRepository.existsByUserId(anyLong())).thenReturn(Boolean.TRUE);
+        when(balanceRepository.existsByUserId(anyLong())).thenReturn(Boolean.FALSE);
+        when(balanceRepository.save(any())).thenReturn(balance);
         when(coinRepository.existsByUserId(anyLong())).thenReturn(Boolean.TRUE);
 
         ResponseEntity<Object> response = adminService.getAllUser(1, 10);
@@ -138,6 +138,77 @@ public class AdminServiceTest {
         assertNotNull(data.getPage());
         assertNotNull(data.getPageAvailable());
         assertNotNull(data.getUsers());
+    }
+
+    @Test
+    void getAllUserNoCoin_Test(){
+
+        User user = User.builder()
+                .id(1L)
+                .name("Hamidb")
+                .email("hamid@gmail.com")
+                .password("password")
+                .phone("081999888990")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        Balance balance = Balance.builder().id(1L).user(user).amount(140000L).build();
+        Coin coin = Coin.builder().id(1L).user(user).amount(9000L).build();
+
+        user.setBalance(balance);
+
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<User> users = new PageImpl<>(List.of(user), pageable, 1);
+
+        when(userRepository.findAll(pageable)).thenReturn(users);
+        when(balanceRepository.existsByUserId(anyLong())).thenReturn(Boolean.TRUE);
+        when(coinRepository.existsByUserId(anyLong())).thenReturn(Boolean.FALSE);
+        when(coinRepository.save(any())).thenReturn(coin);
+
+        ResponseEntity<Object> response = adminService.getAllUser(1, 10);
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+        UserWithPageDto data = (UserWithPageDto) Objects.requireNonNull(apiResponse).getData();
+
+        assertEquals("Get user data success", apiResponse.getMessage());
+        assertEquals("200", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNotNull(apiResponse.getData());
+        assertNotNull(data.getPage());
+        assertNotNull(data.getPageAvailable());
+        assertNotNull(data.getUsers());
+    }
+
+    @Test
+    void getAllUserPageLowerThan1_Test(){
+
+        ResponseEntity<Object> response = adminService.getAllUser(0, 10);
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+
+        assertEquals("page must not be less than 1", apiResponse.getMessage());
+        assertEquals("400", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNull(apiResponse.getData());
+    }
+
+    @Test
+    void getAllUserCountLowerThan1_Test(){
+
+        ResponseEntity<Object> response = adminService.getAllUser(1, 0);
+
+        ApiResponse apiResponse = (ApiResponse) response.getBody();
+
+        assertEquals("count must not be less than 1", apiResponse.getMessage());
+        assertEquals("400", apiResponse.getCode());
+        assertNotNull(apiResponse.getTimestamp());
+        assertNull(apiResponse.getErrors());
+        assertNull(apiResponse.getData());
     }
 
     @Test
