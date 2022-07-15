@@ -35,8 +35,6 @@ This is rest api project for E-Money app called "Bishapay" used to complete Alte
 * [API Reference](https://documenter.getpostman.com/view/12388903/UzBgtonc#6c7ac5b5-b521-4995-9da8-f35750c312dd)
 * [Code Coverage](http://44.201.153.46:8000)
 * [Entity Relational Database](https://dbdiagram.io/d/62b2548a69be0b672c158aeb)
-* Base Url Development : http://44.201.153.46:8081/api
-* Base Url Production : http://44.203.0.77/api
 
 ## Getting Started [Not Ready]
 
