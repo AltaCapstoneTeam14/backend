@@ -4,30 +4,22 @@ import com.alterra.capstone14.constant.EResponseStatus;
 import com.alterra.capstone14.constant.ESIBResponseCode;
 import com.alterra.capstone14.domain.dao.Subscriber;
 import com.alterra.capstone14.domain.dto.SubscriberDto;
-import com.alterra.capstone14.domain.resBody.AllSubscriberRes;
-import com.alterra.capstone14.domain.resBody.GopayChargeRes;
-import com.alterra.capstone14.domain.resBody.NegativeResponseSIB;
+import com.alterra.capstone14.domain.thirdparty.res.AllSubscriberRes;
+import com.alterra.capstone14.domain.thirdparty.res.NegativeResponseSIB;
 import com.alterra.capstone14.repository.SubscriberRepository;
 import com.alterra.capstone14.util.Response;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -73,7 +65,6 @@ public class SubscriberService {
                         return clientResponse.bodyToMono(String.class);
                     }).block();
 
-            log.info(response);
             if(response == null ){
                 throw new NullPointerException("Sendinblue response is null");
             }else if(!response.equals(EResponseStatus.SUCCESS.value)){
@@ -106,8 +97,6 @@ public class SubscriberService {
                         }
                         return clientResponse.bodyToMono(String.class);
                     }).block();
-
-            log.info(response);
 
             if(response == null ){
                 throw new NullPointerException("Sendinblue response is null");
@@ -142,8 +131,6 @@ public class SubscriberService {
                             return Mono.just(EResponseStatus.BAD_REQUEST.value);
                         }
                     }).block();
-
-            log.info("response : {}", response);
 
             if(response == null ){
                 throw new NullPointerException("Sendinblue response is null");

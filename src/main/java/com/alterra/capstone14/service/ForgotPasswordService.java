@@ -1,13 +1,11 @@
 package com.alterra.capstone14.service;
 
 import com.alterra.capstone14.constant.EResponseStatus;
-import com.alterra.capstone14.constant.ESIBResponseCode;
 import com.alterra.capstone14.domain.dao.ForgotPasswordToken;
 import com.alterra.capstone14.domain.dao.User;
 import com.alterra.capstone14.domain.dto.EmailDto;
 import com.alterra.capstone14.domain.dto.PasswordDto;
-import com.alterra.capstone14.domain.reqbody.ForgotPasswordBody;
-import com.alterra.capstone14.domain.resBody.NegativeResponseSIB;
+import com.alterra.capstone14.domain.thirdparty.req.ForgotPasswordBody;
 import com.alterra.capstone14.repository.ForgotPasswordTokenRepository;
 import com.alterra.capstone14.repository.UserRepository;
 import com.alterra.capstone14.util.Response;
@@ -65,7 +63,6 @@ public class ForgotPasswordService {
                 resetPasswordToken.getEmail(),
                 resetPasswordToken.getToken().toString());
 
-        log.info(forgotPasswordBodyString);
         String response = webClient.post()
                 .uri(sibBaseUrl + "/v3/smtp/email")
                 .header("api-key", sibApiKey)

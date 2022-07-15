@@ -1,10 +1,8 @@
-package com.alterra.capstone14.domain.reqbody;
+package com.alterra.capstone14.domain.thirdparty.req;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.implementation.bind.annotation.Super;
-import org.springframework.beans.factory.annotation.Value;
 
 @Getter
 @Setter
@@ -25,12 +23,4 @@ public class TransactionDetailBody {
                 , orderId, grossAmount);
     }
 
-//    public String transactionDetailStringDev() {
-//        return String.format(
-//                "{" +
-//                        "\"order_id\":\"tdev-%s\"," +
-//                        "\"gross_amount\":%d" +
-//                        "}"
-//                , orderId, grossAmount);
-//    }
 }

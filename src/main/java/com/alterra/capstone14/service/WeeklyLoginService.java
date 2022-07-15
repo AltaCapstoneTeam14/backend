@@ -39,9 +39,6 @@ public class WeeklyLoginService {
         String email = userDetails.getUsername();
         Optional<User> user = userRepository.findByEmail(email);
 
-//        DateCurrentImpl dateCurrent = new DateCurrentImpl();
-        log.info(String.valueOf(user.get().getId()));
-
         Optional<WeeklyLogin> weeklyLogin = weeklyLoginRepository.findByUserAndStartDate(user.get().getId(), dateCurrent.getMonday());
         if(weeklyLogin.isEmpty()){
             WeeklyLogin newWeeklyLogin = WeeklyLogin.builder()
@@ -95,8 +92,6 @@ public class WeeklyLoginService {
             weeklyLogin.get().setLoginCount(weeklyLogin.get().getLoginCount()+1);
             weeklyLoginRepository.save(weeklyLogin.get());
 
-            log.info(String.valueOf(dateCurrent.getDay()));
-            log.info(String.valueOf(weeklyLogin.get().getLoginCount()));
             if(dateCurrent.getDay() == 7 && weeklyLogin.get().getLoginCount() == 7){
                 coinReward = 500L;
             }else{
